@@ -1,0 +1,248 @@
+// Pure CSS checkbox component
+.checkbox-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: Arial, sans-serif;
+  user-select: none;
+}
+
+.checkbox {
+  position: relative;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:focus {
+    outline: 2px solid rgba(38, 83, 166, 0.5);
+    outline-offset: 2px;
+  }
+
+  // Sizes
+  &.checkbox-small {
+    width: 16px;
+    height: 16px;
+    
+    .checkmark,
+    .indeterminate-mark {
+      width: 10px;
+      height: 10px;
+    }
+  }
+
+  &.checkbox-medium {
+    width: 20px;
+    height: 20px;
+    
+    .checkmark,
+    .indeterminate-mark {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  &.checkbox-large {
+    width: 24px;
+    height: 24px;
+    
+    .checkmark,
+    .indeterminate-mark {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  // States
+  &.checked {
+    background-color: #2653a6;
+    border-color: #2653a6;
+    color: white;
+
+    &:hover:not(.disabled) {
+      background-color: #1e4080;
+      border-color: #1e4080;
+    }
+  }
+
+  &.indeterminate {
+    background-color: #2653a6;
+    border-color: #2653a6;
+    color: white;
+
+    &:hover:not(.disabled) {
+      background-color: #1e4080;
+      border-color: #1e4080;
+    }
+  }
+
+  &:hover:not(.checked):not(.indeterminate):not(.disabled) {
+    border-color: #2653a6;
+    background-color: rgba(38, 83, 166, 0.05);
+  }
+
+  &.disabled {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+    color: #9ca3af;
+
+    &.checked,
+    &.indeterminate {
+      background-color: #e5e7eb;
+      border-color: #d1d5db;
+    }
+  }
+
+  &.focused:not(.disabled) {
+    border-color: #2653a6;
+    box-shadow: 0 0 0 3px rgba(38, 83, 166, 0.1);
+  }
+}
+
+.checkmark,
+.indeterminate-mark {
+  transition: all 0.1s ease;
+  color: inherit;
+}
+
+.checkbox-label {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.required-asterisk {
+  color: #ea3b26;
+  margin-left: 2px;
+}
+
+// Disabled state for the entire component
+.checkbox-container:has(.checkbox.disabled) {
+  cursor: not-allowed;
+  
+  .checkbox-label {
+    color: #9ca3af;
+  }
+}
+
+// Animation for check/uncheck
+.checkbox:not(.disabled) {
+  .checkmark,
+  .indeterminate-mark {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  &.checked .checkmark,
+  &.indeterminate .indeterminate-mark {
+    transform: scale(1);
+    opacity: 1;
+    animation: checkmark-appear 0.2s ease;
+  }
+}
+
+@keyframes checkmark-appear {
+  0% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .checkbox {
+    // Ensure minimum touch target size
+    &.checkbox-small {
+      width: 20px;
+      height: 20px;
+    }
+  }
+  
+  .checkbox-label {
+    font-size: 16px; // Prevent zoom on iOS
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .checkbox {
+    border-color: #6b7280;
+    background-color: #374151;
+
+    &:hover:not(.checked):not(.indeterminate):not(.disabled) {
+      border-color: #60a5fa;
+      background-color: rgba(96, 165, 250, 0.1);
+    }
+
+    &.checked,
+    &.indeterminate {
+      background-color: #60a5fa;
+      border-color: #60a5fa;
+
+      &:hover:not(.disabled) {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+      }
+    }
+
+    &.disabled {
+      background-color: #1f2937;
+      border-color: #374151;
+
+      &.checked,
+      &.indeterminate {
+        background-color: #374151;
+        border-color: #4b5563;
+      }
+    }
+
+    &.focused:not(.disabled) {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+    }
+  }
+
+  .checkbox-label {
+    color: #f3f4f6;
+  }
+
+  .checkbox-container:has(.checkbox.disabled) .checkbox-label {
+    color: #6b7280;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .checkbox {
+    border-width: 3px;
+
+    &:focus {
+      outline-width: 3px;
+    }
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .checkbox,
+  .checkmark,
+  .indeterminate-mark {
+    transition: none;
+    animation: none;
+  }
+}

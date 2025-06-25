@@ -1,0 +1,300 @@
+// Icon Select implementation based on inputui.md
+.icon-select-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.gradient-bar {
+  position: absolute;
+  left: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #2653a6, #ea3b26);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.icon-select-container:focus-within .gradient-bar {
+  opacity: 1;
+}
+
+.icon-select-trigger {
+  width: 100%;
+  min-height: 56px;
+  padding: 24px 16px 8px 24px;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  outline: none;
+  transition: all 0.3s ease 0.2s;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.icon-select-trigger:hover:not(.disabled) {
+  border-color: #d1d5db;
+}
+
+.icon-select-trigger.focused {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(38, 83, 166, 0.3);
+}
+
+.icon-select-trigger.disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+}
+
+.selected-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.selected-icon {
+  color: #2653a6;
+  flex-shrink: 0;
+}
+
+.selected-text {
+  flex: 1;
+  text-align: left;
+}
+
+.dropdown-arrow {
+  color: #6b7280;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.floating-label {
+  position: absolute;
+  left: 24px;
+  top: 14px;
+  font-size: 14px;
+  color: #6b7280;
+  transition: all 0.2s ease-in-out;
+  cursor: text;
+  pointer-events: none;
+  background-color: white;
+  padding: 0 4px;
+}
+
+.floating-label.active {
+  top: 4px;
+  font-size: 14px;
+  color: #2653a6;
+  font-weight: 600;
+}
+
+.required-asterisk {
+  color: #ea3b26;
+  margin-left: 2px;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  max-height: 200px;
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: all 0.2s ease;
+}
+
+.dropdown-panel.open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.option-item:hover {
+  background-color: #f3f4f6;
+}
+
+.option-item.selected {
+  background-color: #eff6ff;
+  color: #2653a6;
+}
+
+.option-item.selected .option-icon {
+  color: #2653a6;
+}
+
+.option-icon {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.option-label {
+  flex: 1;
+}
+
+.hint-message {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: #ea3b26;
+  font-size: 12px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Error state
+.icon-select-trigger.ng-invalid:not(:focus) {
+  border-color: #ea3b26;
+  box-shadow: 0 0 0 2px rgba(234, 59, 38, 0.3);
+}
+
+.floating-label.ng-invalid {
+  color: #ea3b26;
+}
+
+.icon-select-container:has(.icon-select-trigger.ng-invalid:not(:focus)) .gradient-bar {
+  background: #ea3b26;
+  opacity: 0.8;
+}
+
+// Disabled state
+.icon-select-trigger.disabled + .floating-label {
+  color: #9ca3af;
+}
+
+.icon-select-container:has(.icon-select-trigger:disabled) .gradient-bar {
+  opacity: 0.3;
+  background: #9ca3af;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .icon-select-container {
+    margin-bottom: 0.75rem;
+  }
+  
+  .icon-select-trigger {
+    padding: 20px 12px 6px 20px;
+    font-size: 16px; // Prevent zoom on iOS
+  }
+  
+  .floating-label {
+    left: 20px;
+  }
+  
+  .floating-label.active {
+    font-size: 11px;
+  }
+  
+  .dropdown-panel {
+    max-height: 150px;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .icon-select-trigger {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .icon-select-trigger.focused {
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+  }
+  
+  .floating-label {
+    color: #9ca3af;
+    background-color: #374151;
+  }
+  
+  .floating-label.active {
+    color: #60a5fa;
+  }
+  
+  .dropdown-panel {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+  
+  .option-item {
+    color: #f9fafb;
+  }
+  
+  .option-item:hover {
+    background-color: #4b5563;
+  }
+  
+  .option-item.selected {
+    background-color: #1e3a8a;
+    color: #60a5fa;
+  }
+  
+  .gradient-bar {
+    background: linear-gradient(to bottom, #60a5fa, #f87171);
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .icon-select-trigger {
+    border-width: 2px;
+  }
+  
+  .gradient-bar {
+    width: 8px;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .icon-select-trigger,
+  .floating-label,
+  .gradient-bar,
+  .dropdown-panel,
+  .dropdown-arrow {
+    transition: none;
+  }
+}

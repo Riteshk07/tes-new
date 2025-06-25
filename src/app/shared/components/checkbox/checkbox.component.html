@@ -1,0 +1,48 @@
+<label class="checkbox-container">
+  <div
+    [class]="checkboxClasses"
+    (click)="onToggle()"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    (keydown)="onKeyDown($event)"
+    tabindex="0"
+    role="checkbox"
+    [attr.aria-checked]="value"
+    [attr.aria-disabled]="disabled"
+  >
+    <!-- Checkmark icon -->
+    <svg 
+      *ngIf="value && !indeterminate" 
+      class="checkmark" 
+      width="12" 
+      height="12" 
+      viewBox="0 0 24 24" 
+      fill="none"
+    >
+      <path 
+        d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" 
+        fill="currentColor"
+      />
+    </svg>
+    
+    <!-- Indeterminate icon -->
+    <svg 
+      *ngIf="indeterminate" 
+      class="indeterminate-mark" 
+      width="12" 
+      height="12" 
+      viewBox="0 0 24 24" 
+      fill="none"
+    >
+      <path 
+        d="M19 13H5v-2h14v2z" 
+        fill="currentColor"
+      />
+    </svg>
+  </div>
+  
+  <span *ngIf="label" class="checkbox-label">
+    {{ label }}
+    <span *ngIf="required" class="required-asterisk">*</span>
+  </span>
+</label>

@@ -1,0 +1,371 @@
+// Pure CSS select component implementation
+.select-container {
+  position: relative;
+  width: 240px;
+  margin-bottom: 1rem;
+}
+
+.gradient-bar {
+  position: absolute;
+  left: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #2653a6, #ea3b26);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  z-index: 1;
+
+  &.active {
+    opacity: 1;
+  }
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-trigger {
+  width: 100%;
+  padding: 24px 40px 8px 24px;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  outline: none;
+  transition: all 0.3s ease 0.2s;
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+
+  &.focused {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px rgba(38, 83, 166, 0.3);
+  }
+
+  &.disabled {
+    background-color: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+    border-color: #d1d5db;
+  }
+
+  &.error {
+    border-color: #ea3b26;
+    box-shadow: 0 0 0 2px rgba(234, 59, 38, 0.3);
+  }
+}
+
+.select-value {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: inherit;
+
+  .select-trigger:not(.has-value) & {
+    color: #9ca3af;
+  }
+}
+
+.select-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  color: #6b7280;
+  margin-left: 8px;
+
+  &.rotated {
+    transform: rotate(180deg);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+.floating-label {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #6b7280;
+  transition: all 0.2s ease-in-out;
+  cursor: text;
+  pointer-events: none;
+  background-color: white;
+  padding: 0 4px;
+
+  &.floating {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 12px;
+    color: #2653a6;
+    font-weight: 600;
+  }
+}
+
+.required-asterisk {
+  color: #ea3b26;
+  margin-left: 2px;
+}
+
+.select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 250px;
+  overflow: hidden;
+  margin-top: 4px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.select-search {
+  position: relative;
+  padding: 12px;
+  border-bottom: 1px solid #f3f4f6;
+
+  .search-input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    outline: none;
+    font-size: 14px;
+    background-color: #f9fafb;
+
+    &:focus {
+      border-color: #2653a6;
+      background-color: white;
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
+  }
+}
+
+.select-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.select-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  font-size: 14px;
+  gap: 8px;
+
+  &:hover:not(.disabled) {
+    background-color: rgba(38, 83, 166, 0.05);
+  }
+
+  &.selected {
+    background-color: rgba(38, 83, 166, 0.1);
+    color: #2653a6;
+    font-weight: 600;
+  }
+
+  &.disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.option-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #d1d5db;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &.checked {
+    background-color: #2653a6;
+    border-color: #2653a6;
+    color: white;
+  }
+}
+
+.option-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.no-options {
+  padding: 16px;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: #ea3b26;
+  font-size: 12px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Error state
+.select-trigger.error + .floating-label {
+  color: #ea3b26;
+}
+
+.select-container:has(.select-trigger.error) .gradient-bar {
+  background: #ea3b26;
+  opacity: 0.8;
+}
+
+// Disabled state
+.select-trigger.disabled + .floating-label {
+  color: #9ca3af;
+}
+
+.select-container:has(.select-trigger.disabled) .gradient-bar {
+  opacity: 0.3;
+  background: #9ca3af;
+}
+
+// Focus state for gradient bar
+.select-container:has(.select-trigger.focused) .gradient-bar {
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(38, 83, 166, 0.3);
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .select-container {
+    margin-bottom: 0.75rem;
+  }
+  
+  .select-trigger {
+    padding: 20px 36px 6px 20px;
+    font-size: 16px; // Prevent zoom on iOS
+  }
+  
+  .floating-label {
+    left: 20px;
+    
+    &.floating {
+      font-size: 11px;
+    }
+  }
+
+  .select-dropdown {
+    max-height: 200px;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .select-trigger {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .select-trigger.focused {
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+  }
+  
+  .floating-label {
+    color: #9ca3af;
+    background-color: #374151;
+    
+    &.floating {
+      color: #60a5fa;
+    }
+  }
+  
+  .select-dropdown {
+    background: #374151;
+    border-color: #4b5563;
+  }
+  
+  .select-search .search-input {
+    background-color: #1f2937;
+    border-color: #4b5563;
+    color: #f9fafb;
+    
+    &:focus {
+      border-color: #60a5fa;
+      background-color: #374151;
+    }
+  }
+  
+  .select-option:hover:not(.disabled) {
+    background-color: rgba(96, 165, 250, 0.1);
+  }
+  
+  .select-option.selected {
+    background-color: rgba(96, 165, 250, 0.2);
+    color: #60a5fa;
+  }
+  
+  .gradient-bar {
+    background: linear-gradient(to bottom, #60a5fa, #f87171);
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .select-trigger {
+    border-width: 2px;
+  }
+  
+  .gradient-bar {
+    width: 8px;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .select-trigger,
+  .floating-label,
+  .gradient-bar,
+  .select-dropdown,
+  .select-arrow {
+    transition: none;
+  }
+}

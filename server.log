@@ -1,0 +1,408 @@
+
+Warning: This is a simple server for use in testing or debugging Angular applications
+locally. It hasn't been reviewed for security issues.
+
+Binding this server to an open connection can result in compromising your application or
+computer. Using a different host than the one passed to the "--host" flag might result in
+websocket connection issues. You might need to use "--disable-host-check" if that's the
+case.
+    
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+
+Initial chunk files                                                                                     | Names                                              |  Raw size
+vendor.js                                                                                               | vendor                                             |   4.54 MB | 
+polyfills.js                                                                                            | polyfills                                          | 238.94 kB | 
+styles.js                                                                                               | styles                                             | 133.77 kB | 
+main.js                                                                                                 | main                                               |  48.77 kB | 
+runtime.js                                                                                              | runtime                                            |  12.96 kB | 
+
+                                                                                                        | Initial total                                      |   4.98 MB
+
+Lazy chunk files                                                                                        | Names                                              |  Raw size
+default-node_modules_angular_material_fesm2022_autocomplete_mjs-node_modules_angular_material-01f98a.js | enquiry-form-enquiry-form-component                | 460.85 kB | 
+node_modules_angular_animations_fesm2022_browser_mjs.js                                                 | angular-animations-browser                         | 236.20 kB | 
+default-node_modules_angular_material_fesm2022_chips_mjs.js                                             | features-dashboard-dashboard-component             | 222.71 kB | 
+default-node_modules_angular_material_fesm2022_table_mjs.js                                             | user-list-user-list-component                      | 201.96 kB | 
+default-node_modules_angular_material_fesm2022_tabs_mjs.js                                              | features-dashboard-dashboard-component             | 201.42 kB | 
+default-node_modules_angular_material_fesm2022_error-options-Dm2JJUbF_mjs-node_modules_angula-dd6d3f.js | features-auth-login-login-component                | 153.72 kB | 
+default-node_modules_angular_material_fesm2022_module-Cbt8Fcmv_mjs.js                                   | user-list-user-list-component                      | 126.13 kB | 
+default-node_modules_angular_material_fesm2022_stepper_mjs.js                                           | product-form-product-form-component                | 123.44 kB | 
+default-node_modules_angular_material_fesm2022_module-BnDTus5c_mjs.js                                   | brand-list-brand-list-component                    | 103.37 kB | 
+src_app_features_quotations_quotation-detail_quotation-detail_component_ts.js                           | quotation-detail-quotation-detail-component        |  96.39 kB | 
+default-node_modules_angular_material_fesm2022_paginator_mjs.js                                         | user-list-user-list-component                      |  95.83 kB | 
+src_app_features_quotations_quotation-form_quotation-form_component_ts.js                               | quotation-form-quotation-form-component            |  89.15 kB | 
+src_app_features_products_product-detail_product-detail_component_ts.js                                 | product-detail-product-detail-component            |  85.81 kB | 
+src_app_features_enquiries_enquiry-detail_enquiry-detail_component_ts.js                                | enquiry-detail-enquiry-detail-component            |  83.97 kB | 
+default-node_modules_angular_material_fesm2022_checkbox_mjs.js                                          | user-form-user-form-component                      |  77.31 kB | 
+default-node_modules_angular_material_fesm2022_grid-list_mjs-node_modules_angular_material_fe-847d4b.js | features-dashboard-dashboard-component             |  77.20 kB | 
+src_app_features_enquiries_enquiry-list_enquiry-list_component_ts.js                                    | enquiry-list-enquiry-list-component                |  76.32 kB | 
+src_app_features_quotations_quotation-list_quotation-list_component_ts.js                               | quotation-list-quotation-list-component            |  74.50 kB | 
+default-node_modules_angular_material_fesm2022_expansion_mjs.js                                         | product-detail-product-detail-component            |  73.31 kB | 
+src_app_features_products_product-list_product-list_component_ts.js                                     | product-list-product-list-component                |  65.81 kB | 
+src_app_features_enquiries_enquiry-form_enquiry-form_component_ts.js                                    | enquiry-form-enquiry-form-component                |  65.64 kB | 
+src_app_features_dashboard_dashboard_component_ts.js                                                    | features-dashboard-dashboard-component             |  65.32 kB | 
+default-node_modules_angular_material_fesm2022_input_mjs.js                                             | features-auth-login-login-component                |  64.55 kB | 
+src_app_features_products_product-form_product-form_component_ts.js                                     | product-form-product-form-component                |  53.79 kB | 
+src_app_features_customer-portal_customer-portal_component_ts.js                                        | features-customer-portal-customer-portal-component |  47.48 kB | 
+src_app_features_categories_category-list_category-list_component_ts.js                                 | category-list-category-list-component              |  46.16 kB | 
+default-node_modules_angular_cdk_fesm2022_a11y_mjs.js                                                   | user-list-user-list-component                      |  45.70 kB | 
+src_app_features_categories_category-form_category-form_component_ts.js                                 | category-form-category-form-component              |  43.09 kB | 
+default-node_modules_angular_cdk_fesm2022_observers_private_mjs-node_modules_angular_material-444fe5.js | features-auth-login-login-component                |  39.36 kB | 
+src_app_features_brands_brand-form_brand-form_component_ts.js                                           | brand-form-brand-form-component                    |  36.11 kB | 
+src_app_features_brands_brand-list_brand-list_component_ts.js                                           | brand-list-brand-list-component                    |  34.79 kB | 
+src_app_features_users_user-form_user-form_component_ts.js                                              | user-form-user-form-component                      |  30.38 kB | 
+src_app_features_customers_customer-detail_customer-detail_component_ts.js                              | customer-detail-customer-detail-component          |  29.41 kB | 
+src_app_features_auth_register_register_component_ts.js                                                 | features-auth-register-register-component          |  23.53 kB | 
+src_app_features_customers_customer-list_customer-list_component_ts.js                                  | customer-list-customer-list-component              |  22.10 kB | 
+src_app_features_users_user-list_user-list_component_ts.js                                              | user-list-user-list-component                      |  19.66 kB | 
+src_app_features_auth_login_login_component_ts.js                                                       | features-auth-login-login-component                |  15.61 kB | 
+src_app_features_quotations_quotations_routes_ts.js                                                     | features-quotations-quotations-routes              |   6.09 kB | 
+src_app_features_enquiries_enquiries_routes_ts.js                                                       | features-enquiries-enquiries-routes                |   5.79 kB | 
+src_app_features_products_products_routes_ts.js                                                         | features-products-products-routes                  |   4.92 kB | 
+src_app_features_categories_categories_routes_ts.js                                                     | features-categories-categories-routes              |   3.56 kB | 
+src_app_features_brands_brands_routes_ts.js                                                             | features-brands-brands-routes                      |   3.21 kB | 
+src_app_features_users_users_routes_ts.js                                                               | features-users-users-routes                        |   3.09 kB | 
+src_app_features_customers_customers_routes_ts.js                                                       | features-customers-customers-routes                |   2.27 kB | 
+common.js                                                                                               | common                                             |   1.95 kB | 
+
+Build at: 2025-06-24T01:51:52.917Z - Hash: 882b9cb53f9783a9 - Time: 66936ms
+
+./src/styles.scss - Warning: Module Warning (from ./node_modules/sass-loader/dist/cjs.js):
+Deprecation Warning on line 0, column 8 of file:///mnt/d/Workspace/test/techno-engineering-frontend/src/styles.scss:0:8:
+Sass @import rules are deprecated and will be removed in Dart Sass 3.0.0.
+
+More info and automated migrator: https://sass-lang.com/d/import
+
+0 | @import '@angular/material/theming';
+
+
+src/styles.scss 1:9  root stylesheet
+
+
+
+
+./src/styles.scss - Error: Module build failed (from ./node_modules/sass-loader/dist/cjs.js):
+Can't find stylesheet to import.
+  ╷
+1 │ @import '@angular/material/theming';
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  src/styles.scss 1:9  root stylesheet
+
+./src/styles.scss?ngGlobalStyle - Error: Module build failed (from ./node_modules/mini-css-extract-plugin/dist/loader.js):
+HookWebpackError: Module build failed (from ./node_modules/sass-loader/dist/cjs.js):
+Can't find stylesheet to import.
+  ╷
+1 │ @import '@angular/material/theming';
+  │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+  src/styles.scss 1:9  root stylesheet
+
+Error: [96msrc/app/features/brands/brand-list/brand-list.component.ts[0m:[93m334[0m:[93m3[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'brands'.
+
+[7m334[0m   brands: any[] = [];
+[7m   [0m [91m  ~~~~~~[0m
+
+
+Error: [96msrc/app/features/brands/brand-list/brand-list.component.ts[0m:[93m334[0m:[93m3[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'brands'.
+
+[7m334[0m   brands: any[] = [];
+[7m   [0m [91m  ~~~~~~[0m
+
+
+Error: [96msrc/app/features/brands/brand-list/brand-list.component.ts[0m:[93m442[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'brands'.
+
+[7m442[0m   get brands() {
+[7m   [0m [91m      ~~~~~~[0m
+
+
+Error: [96msrc/app/features/brands/brand-list/brand-list.component.ts[0m:[93m442[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'brands'.
+
+[7m442[0m   get brands() {
+[7m   [0m [91m      ~~~~~~[0m
+
+
+Error: [96msrc/app/features/brands/brand-list/brand-list.component.ts[0m:[93m446[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'brands'.
+
+[7m446[0m   set brands(value: any[]) {
+[7m   [0m [91m      ~~~~~~[0m
+
+
+Error: [96msrc/app/features/brands/brand-list/brand-list.component.ts[0m:[93m446[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'brands'.
+
+[7m446[0m   set brands(value: any[]) {
+[7m   [0m [91m      ~~~~~~[0m
+
+
+Error: [96msrc/app/features/categories/category-list/category-list.component.ts[0m:[93m460[0m:[93m3[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'categories'.
+
+[7m460[0m   categories: any[] = [];
+[7m   [0m [91m  ~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/categories/category-list/category-list.component.ts[0m:[93m460[0m:[93m3[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'categories'.
+
+[7m460[0m   categories: any[] = [];
+[7m   [0m [91m  ~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/categories/category-list/category-list.component.ts[0m:[93m603[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'categories'.
+
+[7m603[0m   get categories() {
+[7m   [0m [91m      ~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/categories/category-list/category-list.component.ts[0m:[93m603[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'categories'.
+
+[7m603[0m   get categories() {
+[7m   [0m [91m      ~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/categories/category-list/category-list.component.ts[0m:[93m607[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'categories'.
+
+[7m607[0m   set categories(value: any[]) {
+[7m   [0m [91m      ~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/categories/category-list/category-list.component.ts[0m:[93m607[0m:[93m7[0m - [91merror[0m[90m TS2300: [0mDuplicate identifier 'categories'.
+
+[7m607[0m   set categories(value: any[]) {
+[7m   [0m [91m      ~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/customer-portal/customer-portal.component.ts[0m:[93m204[0m:[93m55[0m - [91merror[0m[90m TS2339: [0mProperty 'phoneNumber' does not exist on type 'UserDto'.
+
+[7m204[0m                       <span class="info-value">{{user.phoneNumber || 'Not provided'}}</span>
+[7m   [0m [91m                                                      ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/customer-portal/customer-portal.component.ts[0m:[93m208[0m:[93m55[0m - [91merror[0m[90m TS2339: [0mProperty 'role' does not exist on type 'UserDto'.
+
+[7m208[0m                       <span class="info-value">{{user.role}}</span>
+[7m   [0m [91m                                                      ~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-detail/enquiry-detail.component.ts[0m:[93m76[0m:[93m13[0m - [91merror[0m[90m NG8001: [0m'mat-divider' is not a known element:
+1. If 'mat-divider' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'mat-divider' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+
+[7m76[0m             <mat-divider></mat-divider>
+[7m  [0m [91m            ~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-detail/enquiry-detail.component.ts[0m:[93m153[0m:[93m88[0m - [91merror[0m[90m TS2532: [0mObject is possibly 'undefined'.
+
+[7m153[0m                   <span class="priority-badge" [class]="'priority-' + enquiry.priority.toLowerCase()">
+[7m   [0m [91m                                                                                       ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-detail/enquiry-detail.component.ts[0m:[93m154[0m:[93m57[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+
+[7m154[0m                     <mat-icon>{{getPriorityIcon(enquiry.priority)}}</mat-icon>
+[7m   [0m [91m                                                        ~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-detail/enquiry-detail.component.ts[0m:[93m821[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'EnquiredProductDto'.
+
+[7m821[0m           id: 1,
+[7m   [0m [91m          ~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-detail/enquiry-detail.component.ts[0m:[93m885[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'number | null' is not assignable to type 'number | undefined'.
+  Type 'null' is not assignable to type 'number | undefined'.
+
+[7m885[0m       this.enquiry.assignedStaffId = staffId;
+[7m   [0m [91m      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-form/enquiry-form.component.ts[0m:[93m499[0m:[93m31[0m - [91merror[0m[90m TS2304: [0mCannot find name 'FormControl'.
+
+[7m499[0m   customerSearchControl = new FormControl('');
+[7m   [0m [91m                              ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-form/enquiry-form.component.ts[0m:[93m500[0m:[93m30[0m - [91merror[0m[90m TS2304: [0mCannot find name 'FormControl'.
+
+[7m500[0m   productSearchControl = new FormControl('');
+[7m   [0m [91m                             ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-form/enquiry-form.component.ts[0m:[93m545[0m:[93m42[0m - [91merror[0m[90m TS2345: [0mArgument of type '{}' is not assignable to parameter of type 'string'.
+
+[7m545[0m       map(value => this._filterCustomers(value || ''))
+[7m   [0m [91m                                         ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-form/enquiry-form.component.ts[0m:[93m550[0m:[93m41[0m - [91merror[0m[90m TS2345: [0mArgument of type '{}' is not assignable to parameter of type 'string'.
+
+[7m550[0m       map(value => this._filterProducts(value || ''))
+[7m   [0m [91m                                        ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-list/enquiry-list.component.ts[0m:[93m82[0m:[93m80[0m - [91merror[0m[90m TS2339: [0mProperty 'toLowerCase' does not exist on type 'EnquiryStatus'.
+
+[7m82[0m                     <span class="status-dot" [class]="'status-' + status.value.toLowerCase()"></span>
+[7m  [0m [91m                                                                               ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-list/enquiry-list.component.ts[0m:[93m292[0m:[93m19[0m - [91merror[0m[90m NG8001: [0m'mat-divider' is not a known element:
+1. If 'mat-divider' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'mat-divider' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+
+[7m292[0m                   <mat-divider></mat-divider>
+[7m   [0m [91m                  ~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-list/enquiry-list.component.ts[0m:[93m710[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'EnquiredProductDto'.
+
+[7m710[0m           { id: 1, enquiryId: 1, productId: 1, productName: 'Industrial Motor', productModel: 'IM-001', quantity: 10, notes: 'Urgent requirement' }
+[7m   [0m [91m            ~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-list/enquiry-list.component.ts[0m:[93m733[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'EnquiredProductDto'.
+
+[7m733[0m           { id: 2, enquiryId: 2, productId: 2, productName: 'Electronic Controller', productModel: 'EC-002', quantity: 25, notes: 'Need technical specifications' }
+[7m   [0m [91m            ~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-list/enquiry-list.component.ts[0m:[93m752[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'EnquiredProductDto'.
+
+[7m752[0m           { id: 3, enquiryId: 3, productId: 3, productName: 'Precision Tool', productModel: 'PT-003', quantity: 5, notes: 'High precision required' }
+[7m   [0m [91m            ~~[0m
+
+
+Error: [96msrc/app/features/enquiries/enquiry-list/enquiry-list.component.ts[0m:[93m825[0m:[93m53[0m - [91merror[0m[90m TS2538: [0mType 'undefined' cannot be used as an index type.
+
+[7m825[0m     return this.enquiries.filter(e => EnquiryStatus[e.status] === status).length;
+[7m   [0m [91m                                                    ~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-detail/quotation-detail.component.ts[0m:[93m162[0m:[93m57[0m - [91merror[0m[90m TS2339: [0mProperty 'enquiryId' does not exist on type 'QuotationDto'.
+
+[7m162[0m                 <div class="info-item" *ngIf="quotation.enquiryId">
+[7m   [0m [91m                                                        ~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-detail/quotation-detail.component.ts[0m:[93m164[0m:[93m66[0m - [91merror[0m[90m TS2339: [0mProperty 'enquiryId' does not exist on type 'QuotationDto'.
+
+[7m164[0m                   <a [routerLink]="['/enquiries/view', quotation.enquiryId]">
+[7m   [0m [91m                                                                 ~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-detail/quotation-detail.component.ts[0m:[93m257[0m:[93m51[0m - [91merror[0m[90m TS2532: [0mObject is possibly 'undefined'.
+
+[7m257[0m                     <div class="total-row" *ngIf="quotation.totalDiscount > 0">
+[7m   [0m [91m                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-detail/quotation-detail.component.ts[0m:[93m993[0m:[93m11[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'QuotationItemDto'.
+
+[7m993[0m           id: 1,
+[7m   [0m [91m          ~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m82[0m:[93m80[0m - [91merror[0m[90m TS2339: [0mProperty 'toLowerCase' does not exist on type 'QuotationStatus'.
+
+[7m82[0m                     <span class="status-dot" [class]="'status-' + status.value.toLowerCase()"></span>
+[7m  [0m [91m                                                                               ~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m296[0m:[93m19[0m - [91merror[0m[90m NG8001: [0m'mat-divider' is not a known element:
+1. If 'mat-divider' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'mat-divider' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+
+[7m296[0m                   <mat-divider></mat-divider>
+[7m   [0m [91m                  ~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m690[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'QuotationItemDto'.
+
+[7m690[0m             id: 1,
+[7m   [0m [91m            ~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m727[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'QuotationItemDto'.
+
+[7m727[0m             id: 2,
+[7m   [0m [91m            ~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m762[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'id' does not exist in type 'QuotationItemDto'.
+
+[7m762[0m             id: 3,
+[7m   [0m [91m            ~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m830[0m:[93m56[0m - [91merror[0m[90m TS2538: [0mType 'undefined' cannot be used as an index type.
+
+[7m830[0m     return this.quotations.filter(q => QuotationStatus[q.status] === status).length;
+[7m   [0m [91m                                                       ~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/quotations/quotation-list/quotation-list.component.ts[0m:[93m834[0m:[93m57[0m - [91merror[0m[90m TS18048: [0m'q.grandTotal' is possibly 'undefined'.
+
+[7m834[0m     return this.quotations.reduce((total, q) => total + q.grandTotal, 0);
+[7m   [0m [91m                                                        ~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/features/users/user-form/user-form.component.ts[0m:[93m252[0m:[93m33[0m - [91merror[0m[90m TS2345: [0mArgument of type '(form: FormGroup<any>) => { passwordMismatch: boolean; } | null' is not assignable to parameter of type 'ValidatorFn | ValidatorFn[] | null'.
+  Type '(form: FormGroup<any>) => { passwordMismatch: boolean; } | null' is not assignable to type 'ValidatorFn'.
+    Types of parameters 'form' and 'control' are incompatible.
+      Type 'AbstractControl<any, any>' is missing the following properties from type 'FormGroup<any>': controls, registerControl, addControl, removeControl, and 2 more.
+
+[7m252[0m     this.userForm.setValidators(this.passwordMatchValidator);
+[7m   [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Error: [96msrc/app/services/responsive.service.ts[0m:[93m28[0m:[93m42[0m - [91merror[0m[90m TS2729: [0mProperty 'breakpointObserver' is used before its initialization.
+
+[7m28[0m   isHandset$: Observable<boolean> = this.breakpointObserver.observe([
+[7m  [0m [91m                                         ~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/app/services/responsive.service.ts[0m:[93m62[0m:[93m15[0m
+    [7m62[0m   constructor(private breakpointObserver: BreakpointObserver) {
+    [7m  [0m [96m              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'breakpointObserver' is declared here.
+
+
+Error: [96msrc/app/services/responsive.service.ts[0m:[93m37[0m:[93m41[0m - [91merror[0m[90m TS2729: [0mProperty 'breakpointObserver' is used before its initialization.
+
+[7m37[0m   isTablet$: Observable<boolean> = this.breakpointObserver.observe([
+[7m  [0m [91m                                        ~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/app/services/responsive.service.ts[0m:[93m62[0m:[93m15[0m
+    [7m62[0m   constructor(private breakpointObserver: BreakpointObserver) {
+    [7m  [0m [96m              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'breakpointObserver' is declared here.
+
+
+Error: [96msrc/app/services/responsive.service.ts[0m:[93m46[0m:[93m42[0m - [91merror[0m[90m TS2729: [0mProperty 'breakpointObserver' is used before its initialization.
+
+[7m46[0m   isDesktop$: Observable<boolean> = this.breakpointObserver.observe([
+[7m  [0m [91m                                         ~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/app/services/responsive.service.ts[0m:[93m62[0m:[93m15[0m
+    [7m62[0m   constructor(private breakpointObserver: BreakpointObserver) {
+    [7m  [0m [96m              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'breakpointObserver' is declared here.
+
+
+Error: [96msrc/app/services/responsive.service.ts[0m:[93m55[0m:[93m40[0m - [91merror[0m[90m TS2729: [0mProperty 'breakpointObserver' is used before its initialization.
+
+[7m55[0m   isLarge$: Observable<boolean> = this.breakpointObserver.observe([
+[7m  [0m [91m                                       ~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/app/services/responsive.service.ts[0m:[93m62[0m:[93m15[0m
+    [7m62[0m   constructor(private breakpointObserver: BreakpointObserver) {
+    [7m  [0m [96m              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'breakpointObserver' is declared here.
+
+
+
+
+** Angular Live Development Server is listening on 0.0.0.0:4200, open your browser on http://localhost:4200/ **
+
+
+✖ Failed to compile.

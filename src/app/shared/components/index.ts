@@ -1,0 +1,21 @@
+// Barrel exports for shared components
+export { FloatingInputComponent } from './floating-input/floating-input.component';
+export { SearchInputComponent } from './search-input/search-input.component';
+export { ButtonComponent } from './button/button.component';
+export { SelectComponent } from './select/select.component';
+export type { SelectOption } from './select/select.component';
+export { CheckboxComponent } from './checkbox/checkbox.component';
+export { IconSelectComponent } from './icon-select/icon-select.component';
+export type { IconOption } from './icon-select/icon-select.component';
+export { PasswordInputComponent } from './password-input/password-input.component';
+export { DateInputComponent } from './date-input/date-input.component';
+export { StepperComponent, StepperStepComponent } from './stepper/stepper.component';
+export { ChipComponent, ChipSetComponent } from './chip/chip.component';
+export type { ChipVariant } from './chip/chip.component';
+export { AutocompleteComponent } from './autocomplete/autocomplete.component';
+export type { AutocompleteOption } from './autocomplete/autocomplete.component';
+export { TableComponent } from './table/table.component';
+export type { TableColumn, TableAction } from './table/table.component';
+export { CardComponent } from './card/card.component';
+export { ExpansionPanelComponent } from './expansion-panel/expansion-panel.component';
+export { InputDemoComponent } from './input-demo/input-demo.component';

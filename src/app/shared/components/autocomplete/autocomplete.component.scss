@@ -1,0 +1,357 @@
+// Autocomplete component implementation based on inputui.md
+.autocomplete-container {
+  position: relative;
+  width: 240px;
+  margin-bottom: 1rem;
+}
+
+.gradient-bar {
+  position: absolute;
+  left: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #2653a6, #ea3b26);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.autocomplete-container:focus-within .gradient-bar {
+  opacity: 1;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.autocomplete-input {
+  width: 100%;
+  padding: 24px 48px 8px 24px;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  outline: none;
+  transition: all 0.3s ease 0.2s;
+  font-family: Arial, sans-serif;
+}
+
+.autocomplete-input::placeholder {
+  color: transparent;
+}
+
+.autocomplete-input:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(38, 83, 166, 0.3);
+}
+
+.floating-label {
+  position: absolute;
+  left: 24px;
+  top: 14px;
+  font-size: 14px;
+  color: #6b7280;
+  transition: all 0.2s ease-in-out;
+  cursor: text;
+  pointer-events: none;
+  background-color: white;
+  padding: 0 4px;
+}
+
+.autocomplete-input:placeholder-shown + .floating-label {
+  top: 14px;
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.autocomplete-input:focus + .floating-label,
+.autocomplete-input:not(:placeholder-shown) + .floating-label {
+  top: 4px;
+  font-size: 14px;
+  color: #2653a6;
+  font-weight: 600;
+}
+
+.required-asterisk {
+  color: #ea3b26;
+  margin-left: 2px;
+}
+
+.clear-button {
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #374151;
+    background-color: rgba(107, 114, 128, 0.1);
+  }
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.autocomplete-input:focus ~ .dropdown-arrow {
+  color: #2653a6;
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.options-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.option {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f3f4f6;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover:not(.disabled) {
+    background-color: #f9fafb;
+  }
+
+  &.active:not(.disabled) {
+    background-color: rgba(38, 83, 166, 0.1);
+  }
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option-label {
+  font-weight: 500;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.option-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.hint-message {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: #ea3b26;
+  font-size: 12px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Error state
+.autocomplete-input.ng-invalid.ng-touched:not(:focus) {
+  border-color: #ea3b26;
+  box-shadow: 0 0 0 2px rgba(234, 59, 38, 0.3);
+}
+
+.autocomplete-input.ng-invalid.ng-touched:not(:focus) + .floating-label {
+  color: #ea3b26;
+}
+
+.autocomplete-container:has(.autocomplete-input.ng-invalid.ng-touched:not(:focus)) .gradient-bar {
+  background: #ea3b26;
+  opacity: 0.8;
+}
+
+// Disabled state
+.autocomplete-input:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+}
+
+.autocomplete-input:disabled + .floating-label {
+  color: #9ca3af;
+}
+
+.autocomplete-container:has(.autocomplete-input:disabled) .gradient-bar {
+  opacity: 0.3;
+  background: #9ca3af;
+}
+
+.autocomplete-input:disabled ~ .dropdown-arrow {
+  color: #9ca3af;
+}
+
+// Custom scrollbar for options dropdown
+.options-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.options-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.options-dropdown::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.options-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .autocomplete-container {
+    margin-bottom: 0.75rem;
+  }
+  
+  .autocomplete-input {
+    padding: 20px 44px 6px 20px;
+    font-size: 16px; // Prevent zoom on iOS
+  }
+  
+  .floating-label {
+    left: 20px;
+  }
+  
+  .autocomplete-input:focus + .floating-label,
+  .autocomplete-input:not(:placeholder-shown) + .floating-label {
+    font-size: 11px;
+  }
+
+  .clear-button {
+    right: 28px;
+  }
+
+  .dropdown-arrow {
+    right: 8px;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .autocomplete-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .autocomplete-input:focus {
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+  }
+  
+  .floating-label {
+    color: #9ca3af;
+    background-color: #374151;
+  }
+  
+  .autocomplete-input:focus + .floating-label,
+  .autocomplete-input:not(:placeholder-shown) + .floating-label {
+    color: #60a5fa;
+  }
+  
+  .gradient-bar {
+    background: linear-gradient(to bottom, #60a5fa, #f87171);
+  }
+
+  .options-dropdown {
+    background-color: #374151;
+    border-color: #4b5563;
+  }
+
+  .option {
+    border-color: #4b5563;
+
+    &:hover:not(.disabled) {
+      background-color: #4b5563;
+    }
+
+    &.active:not(.disabled) {
+      background-color: rgba(96, 165, 250, 0.2);
+    }
+  }
+
+  .option-label {
+    color: #f9fafb;
+  }
+
+  .option-subtitle {
+    color: #9ca3af;
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .autocomplete-input {
+    border-width: 2px;
+  }
+  
+  .gradient-bar {
+    width: 8px;
+  }
+
+  .options-dropdown {
+    border-width: 2px;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .autocomplete-input,
+  .floating-label,
+  .gradient-bar,
+  .dropdown-arrow,
+  .option {
+    transition: none;
+  }
+}

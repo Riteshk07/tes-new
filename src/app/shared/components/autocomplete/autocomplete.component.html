@@ -1,0 +1,80 @@
+<div class="autocomplete-container" [style.width]="width">
+  <span class="gradient-bar"></span>
+  
+  <div class="input-wrapper">
+    <input
+      #input
+      [id]="'autocomplete-' + label"
+      type="text"
+      placeholder=" "
+      [disabled]="disabled"
+      [required]="required"
+      [formControl]="searchControl"
+      class="autocomplete-input"
+      (focus)="onFocus()"
+      (blur)="onBlur()"
+      (keydown)="onKeydown($event)"
+      autocomplete="off"
+    />
+    
+    <label 
+      [for]="'autocomplete-' + label" 
+      class="floating-label"
+    >
+      {{ label }}
+      <span *ngIf="required" class="required-asterisk">*</span>
+    </label>
+
+    <button 
+      *ngIf="hasValue && !disabled"
+      type="button"
+      class="clear-button"
+      (click)="clearSelection()"
+      tabindex="-1"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+
+    <div class="dropdown-arrow">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+      </svg>
+    </div>
+  </div>
+
+  <div 
+    *ngIf="isOpen && filteredOptions.length > 0" 
+    class="options-dropdown"
+  >
+    <div 
+      *ngFor="let option of filteredOptions; let i = index; trackBy: trackByIndex"
+      class="option"
+      [class.active]="i === activeIndex"
+      [class.disabled]="option.disabled"
+      (click)="selectOption(option)"
+    >
+      <div class="option-content">
+        <div class="option-label">{{ getPropertyValue(option, displayProperty) }}</div>
+        <div 
+          *ngIf="option.subtitle || getPropertyValue(option, subtitleProperty)" 
+          class="option-subtitle"
+        >
+          {{ option.subtitle || getPropertyValue(option, subtitleProperty) }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="hint && !error" class="hint-message">
+    {{ hint }}
+  </div>
+  
+  <div *ngIf="error" class="error-message">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+</div>

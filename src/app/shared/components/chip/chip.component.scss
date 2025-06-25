@@ -1,0 +1,200 @@
+// Chip component styling
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: Arial, sans-serif;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: default;
+  user-select: none;
+}
+
+.chip-clickable {
+  cursor: pointer;
+}
+
+.chip-clickable:hover:not(.chip-disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.chip-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.chip-label {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+.chip-remove:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.chip-remove svg {
+  width: 14px;
+  height: 14px;
+}
+
+// Variants
+.chip-default {
+  background-color: #f3f4f6;
+  color: #374151;
+  border-color: #e5e7eb;
+}
+
+.chip-default.chip-selected {
+  background-color: #e5e7eb;
+  border-color: #d1d5db;
+}
+
+.chip-default .chip-remove:hover {
+  background-color: rgba(55, 65, 81, 0.1);
+}
+
+.chip-primary {
+  background-color: #eff6ff;
+  color: #2653a6;
+  border-color: #dbeafe;
+}
+
+.chip-primary.chip-selected {
+  background-color: #2653a6;
+  color: white;
+  border-color: #2653a6;
+}
+
+.chip-primary .chip-remove:hover {
+  background-color: rgba(38, 83, 166, 0.1);
+}
+
+.chip-primary.chip-selected .chip-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip-secondary {
+  background-color: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
+}
+
+.chip-secondary.chip-selected {
+  background-color: #64748b;
+  color: white;
+  border-color: #64748b;
+}
+
+.chip-secondary .chip-remove:hover {
+  background-color: rgba(100, 116, 139, 0.1);
+}
+
+.chip-secondary.chip-selected .chip-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip-success {
+  background-color: #f0fdf4;
+  color: #166534;
+  border-color: #dcfce7;
+}
+
+.chip-success.chip-selected {
+  background-color: #16a34a;
+  color: white;
+  border-color: #16a34a;
+}
+
+.chip-success .chip-remove:hover {
+  background-color: rgba(22, 101, 52, 0.1);
+}
+
+.chip-success.chip-selected .chip-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip-warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border-color: #fed7aa;
+}
+
+.chip-warning.chip-selected {
+  background-color: #f59e0b;
+  color: white;
+  border-color: #f59e0b;
+}
+
+.chip-warning .chip-remove:hover {
+  background-color: rgba(146, 64, 14, 0.1);
+}
+
+.chip-warning.chip-selected .chip-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip-danger {
+  background-color: #fef2f2;
+  color: #ea3b26;
+  border-color: #fecaca;
+}
+
+.chip-danger.chip-selected {
+  background-color: #ea3b26;
+  color: white;
+  border-color: #ea3b26;
+}
+
+.chip-danger .chip-remove:hover {
+  background-color: rgba(234, 59, 38, 0.1);
+}
+
+.chip-danger.chip-selected .chip-remove:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+// Disabled state
+.chip-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+// Responsive design
+@media (max-width: 480px) {
+  .chip {
+    padding: 4px 8px;
+    font-size: 12px;
+    gap: 4px;
+  }
+  
+  .chip-icon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .chip-remove svg {
+    width: 12px;
+    height: 12px;
+  }
+}

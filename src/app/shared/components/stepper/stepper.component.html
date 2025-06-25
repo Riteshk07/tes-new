@@ -1,0 +1,75 @@
+<div class="stepper-container">
+  <!-- Stepper Header -->
+  <div class="stepper-header">
+    <div 
+      *ngFor="let step of stepList; let i = index"
+      class="step-header"
+      [class.active]="i === selectedIndex"
+      [class.completed]="isStepCompleted(i)"
+      [class.invalid]="getStepState(i) === 'invalid'"
+      [class.clickable]="canGoToStep(i)"
+      (click)="canGoToStep(i) && goToStep(i)"
+    >
+      <div class="step-indicator">
+        <div class="step-number" *ngIf="getStepState(i) !== 'completed'">
+          {{ i + 1 }}
+        </div>
+        <svg *ngIf="getStepState(i) === 'completed'" class="step-check" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+        </svg>
+      </div>
+      
+      <div class="step-label">
+        <span class="step-title">{{ step.label }}</span>
+        <span *ngIf="step.optional" class="step-optional">Optional</span>
+      </div>
+      
+      <div *ngIf="i < stepList.length - 1" class="step-connector"></div>
+    </div>
+  </div>
+
+  <!-- Stepper Content -->
+  <div class="stepper-content">
+    <div 
+      *ngFor="let step of stepList; let i = index"
+      class="step-content"
+      [class.active]="i === selectedIndex"
+    >
+      <ng-container *ngIf="i === selectedIndex">
+        <ng-content select="app-stepper-step" [ngTemplateOutletContext]="{ $implicit: step, index: i }"></ng-content>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Stepper Navigation -->
+  <div class="stepper-navigation">
+    <button 
+      type="button"
+      class="nav-button secondary"
+      [disabled]="!canGoToPrevious()"
+      (click)="previous()"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+      </svg>
+      Previous
+    </button>
+    
+    <span class="step-counter">
+      Step {{ selectedIndex + 1 }} of {{ stepList.length }}
+    </span>
+    
+    <button 
+      type="button"
+      class="nav-button primary"
+      [disabled]="!canGoToNext()"
+      (click)="next()"
+      *ngIf="selectedIndex < stepList.length - 1"
+    >
+      Next
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+      </svg>
+    </button>
+  </div>
+</div>

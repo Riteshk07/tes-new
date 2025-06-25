@@ -1,0 +1,79 @@
+<div class="select-container" [style.width]="width">
+  <span class="gradient-bar" [class.active]="isFocused || isOpen"></span>
+  
+  <div class="select-wrapper">
+    <div
+      class="select-trigger"
+      [class.focused]="isFocused || isOpen"
+      [class.disabled]="disabled"
+      [class.has-value]="hasValue"
+      [class.error]="error"
+      (click)="onToggle()"
+      (keydown)="onKeyDown($event)"
+      tabindex="0"
+    >
+      <span class="select-value">{{ getDisplayValue() }}</span>
+      <span class="select-arrow" [class.rotated]="isOpen">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+      </span>
+    </div>
+
+    <label class="floating-label" [class.floating]="hasValue || isOpen || isFocused">
+      {{ label }}
+      <span *ngIf="required" class="required-asterisk">*</span>
+    </label>
+
+    <!-- Dropdown Options -->
+    <div class="select-dropdown" [class.open]="isOpen" *ngIf="isOpen">
+      <!-- Search input for searchable select -->
+      <div *ngIf="searchable" class="select-search">
+        <input
+          #searchInput
+          type="text"
+          placeholder="Search options..."
+          class="search-input"
+          [(ngModel)]="searchTerm"
+          (input)="onSearchChange($event)"
+        />
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </div>
+
+      <!-- Options list -->
+      <div class="select-options">
+        <div
+          *ngFor="let option of filteredOptions; trackBy: trackByValue"
+          class="select-option"
+          [class.selected]="isSelected(option)"
+          [class.disabled]="option.disabled"
+          (click)="onSelectOption(option)"
+        >
+          <!-- Checkbox for multiple selection -->
+          <span *ngIf="multiple" class="option-checkbox" [class.checked]="isSelected(option)">
+            <svg *ngIf="isSelected(option)" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          </span>
+          
+          <span class="option-label">{{ option.label }}</span>
+        </div>
+
+        <!-- No options message -->
+        <div *ngIf="filteredOptions.length === 0" class="no-options">
+          No options found
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="error-message">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+</div>

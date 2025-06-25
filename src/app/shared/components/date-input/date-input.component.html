@@ -1,0 +1,33 @@
+<div class="input-container" [style.width]="width">
+  <span class="gradient-bar"></span>
+  
+  <input
+    [id]="'date-input-' + label"
+    type="date"
+    placeholder=" "
+    [disabled]="disabled"
+    [required]="required"
+    [value]="value"
+    [min]="min"
+    [max]="max"
+    class="date-input"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+  />
+  
+  <label 
+    [for]="'date-input-' + label" 
+    class="floating-label"
+  >
+    {{ label }}
+    <span *ngIf="required" class="required-asterisk">*</span>
+  </label>
+  
+  <div *ngIf="error" class="error-message">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <span>{{ error }}</span>
+  </div>
+</div>

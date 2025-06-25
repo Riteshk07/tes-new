@@ -1,0 +1,203 @@
+// Date input implementation based on inputui.md
+.input-container {
+  position: relative;
+  width: 240px;
+  margin-bottom: 1rem;
+}
+
+.gradient-bar {
+  position: absolute;
+  left: -2px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to bottom, #2653a6, #ea3b26);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.input-container:focus-within .gradient-bar {
+  opacity: 1;
+}
+
+.date-input {
+  width: 100%;
+  padding: 24px 16px 8px 24px;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  outline: none;
+  transition: all 0.3s ease 0.2s;
+  font-family: Arial, sans-serif;
+}
+
+.date-input::placeholder {
+  color: transparent;
+}
+
+.date-input:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px rgba(38, 83, 166, 0.3);
+}
+
+.floating-label {
+  position: absolute;
+  left: 24px;
+  top: 14px;
+  font-size: 14px;
+  color: #6b7280;
+  transition: all 0.2s ease-in-out;
+  cursor: text;
+  pointer-events: none;
+  background-color: white;
+  padding: 0 4px;
+}
+
+.date-input:placeholder-shown + .floating-label {
+  top: 14px;
+  font-size: 16px;
+  color: #9ca3af;
+}
+
+.date-input:focus + .floating-label,
+.date-input:not(:placeholder-shown) + .floating-label {
+  top: 4px;
+  font-size: 14px;
+  color: #2653a6;
+  font-weight: 600;
+}
+
+.required-asterisk {
+  color: #ea3b26;
+  margin-left: 2px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: #ea3b26;
+  font-size: 12px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Error state
+.date-input.ng-invalid.ng-touched:not(:focus) {
+  border-color: #ea3b26;
+  box-shadow: 0 0 0 2px rgba(234, 59, 38, 0.3);
+}
+
+.date-input.ng-invalid.ng-touched:not(:focus) + .floating-label {
+  color: #ea3b26;
+}
+
+.input-container:has(.date-input.ng-invalid.ng-touched:not(:focus)) .gradient-bar {
+  background: #ea3b26;
+  opacity: 0.8;
+}
+
+// Disabled state
+.date-input:disabled {
+  background-color: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+}
+
+.date-input:disabled + .floating-label {
+  color: #9ca3af;
+}
+
+.input-container:has(.date-input:disabled) .gradient-bar {
+  opacity: 0.3;
+  background: #9ca3af;
+}
+
+// Date picker specific styles
+.date-input::-webkit-calendar-picker-indicator {
+  color: #2653a6;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.date-input::-webkit-calendar-picker-indicator:hover {
+  background-color: rgba(38, 83, 166, 0.1);
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .input-container {
+    margin-bottom: 0.75rem;
+  }
+  
+  .date-input {
+    padding: 20px 12px 6px 20px;
+    font-size: 16px; // Prevent zoom on iOS
+  }
+  
+  .floating-label {
+    left: 20px;
+  }
+  
+  .date-input:focus + .floating-label,
+  .date-input:not(:placeholder-shown) + .floating-label {
+    font-size: 11px;
+  }
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  .date-input {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+  }
+  
+  .date-input:focus {
+    box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+  }
+  
+  .floating-label {
+    color: #9ca3af;
+    background-color: #374151;
+  }
+  
+  .date-input:focus + .floating-label,
+  .date-input:not(:placeholder-shown) + .floating-label {
+    color: #60a5fa;
+  }
+  
+  .gradient-bar {
+    background: linear-gradient(to bottom, #60a5fa, #f87171);
+  }
+}
+
+// High contrast mode
+@media (prefers-contrast: high) {
+  .date-input {
+    border-width: 2px;
+  }
+  
+  .gradient-bar {
+    width: 8px;
+  }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+  .date-input,
+  .floating-label,
+  .gradient-bar {
+    transition: none;
+  }
+}

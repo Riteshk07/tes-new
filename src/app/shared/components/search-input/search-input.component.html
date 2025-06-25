@@ -1,0 +1,51 @@
+<div class="search-container" [style.width]="width">
+  <input
+    type="text"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [value]="value"
+    class="search-input"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    (keydown)="onKeydown($event)"
+  />
+  
+  <!-- Clear button (only show when there's text and not loading) -->
+  <button 
+    *ngIf="clearButton && hasValue && !loading" 
+    type="button"
+    class="clear-button"
+    (click)="onClear()"
+    [disabled]="disabled"
+    aria-label="Clear search"
+  >
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+    </svg>
+  </button>
+  
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="loading-spinner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="60" stroke-dashoffset="60">
+        <animate attributeName="stroke-dashoffset" values="60;0" dur="1s" repeatCount="indefinite"/>
+      </circle>
+    </svg>
+  </div>
+  
+  <!-- Search icon -->
+  <svg
+    *ngIf="!loading"
+    class="search-icon"
+    xmlns="http://www.w3.org/2000/svg"
+    width="22"
+    height="22"
+    viewBox="0 0 30 30"
+    fill="#6B7280"
+  >
+    <path
+      d="M 13 3 C 7.4889971 3 3 7.4889971 3 13 C 3 18.511003 7.4889971 23 13 23 C 15.396508 23 17.597385 22.148986 19.322266 20.736328 L 25.292969 26.707031 A 1.0001 1.0001 0 1 0 26.707031 25.292969 L 20.736328 19.322266 C 22.148986 17.597385 23 15.396508 23 13 C 23 7.4889971 18.511003 3 13 3 z M 13 5 C 17.430123 5 21 8.5698774 21 13 C 21 17.430123 17.430123 21 13 21 C 8.5698774 21 5 17.430123 5 13 C 5 8.5698774 8.5698774 5 13 5 z"
+    />
+  </svg>
+</div>
