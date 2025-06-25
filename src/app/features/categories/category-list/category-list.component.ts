@@ -1,16 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+// Import shared components
+import { 
+  SearchInputComponent,
+  ButtonComponent,
+  CardComponent
+} from '../../../shared/components';
 
 @Component({
   selector: 'app-category-list',
@@ -18,193 +15,213 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   imports: [
     CommonModule,
     RouterModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSnackBarModule
+    SearchInputComponent,
+    ButtonComponent,
+    CardComponent
   ],
   template: `
     <div class="category-list-container">
       <div class="header">
         <h1>Category Management</h1>
-        <button mat-raised-button color="primary" routerLink="/categories/create">
-          <mat-icon>add</mat-icon>
+        <app-button 
+          variant="primary"
+          routerLink="/categories/create"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
           Add Category
-        </button>
+        </app-button>
       </div>
 
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Product Categories</mat-card-title>
-          <mat-card-subtitle>Organize products into logical categories</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="filters">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search categories</mat-label>
-              <input matInput [formControl]="searchControl" placeholder="Enter category name">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          </div>
+      <app-card title="Product Categories" subtitle="Organize products into logical categories">
+        <div class="filters">
+          <app-search-input
+            placeholder="Search categories by name or description"
+            (search)="onSearch($event)"
+            width="400px"
+          ></app-search-input>
+        </div>
 
-          <div class="table-container">
-            <table mat-table [dataSource]="categories" class="categories-table">
-              <ng-container matColumnDef="id">
-                <th mat-header-cell *matHeaderCellDef>ID</th>
-                <td mat-cell *matCellDef="let category">{{category.id}}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Category Name</th>
-                <td mat-cell *matCellDef="let category">
+        <div class="table-wrapper">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let category of paginatedCategories; trackBy: trackByCategory" class="table-row">
+                <td>{{category.id}}</td>
+                <td>
                   <div class="category-info">
                     <div class="category-name">
-                      <mat-icon class="category-icon">{{getCategoryIcon(category.name)}}</mat-icon>
+                      <svg class="category-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path [attr.d]="getCategoryIconPath(category.name)"/>
+                      </svg>
                       {{category.name}}
                     </div>
                     <div class="product-count">{{getProductCount(category.id)}} products</div>
                   </div>
                 </td>
-              </ng-container>
-
-              <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Description</th>
-                <td mat-cell *matCellDef="let category">
+                <td>
                   <span class="description-text">{{category.description || 'No description'}}</span>
                 </td>
-              </ng-container>
-
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let category">
+                <td>
                   <span class="status-badge" [class.active]="category.isActive" [class.inactive]="!category.isActive">
                     {{category.isActive ? 'Active' : 'Inactive'}}
                   </span>
                 </td>
-              </ng-container>
-
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef>Created</th>
-                <td mat-cell *matCellDef="let category">{{category.createdAt | date:'short'}}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let category">
-                  <button mat-icon-button [routerLink]="['/categories/edit', category.id]" color="primary">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="deleteCategory(category.id)" color="warn" 
-                          [disabled]="getProductCount(category.id) > 0">
-                    <mat-icon>delete</mat-icon>
-                  </button>
+                <td>{{category.createdAt | date:'short'}}</td>
+                <td>
+                  <div class="action-buttons">
+                    <app-button 
+                      variant="outline" 
+                      size="small"
+                      [routerLink]="['/categories/edit', category.id]"
+                      title="Edit Category"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                      </svg>
+                    </app-button>
+                    <app-button 
+                      variant="outline" 
+                      size="small"
+                      (click)="deleteCategory(category.id)"
+                      [disabled]="getProductCount(category.id) > 0"
+                      title="Delete Category"
+                      class="delete-button"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                      </svg>
+                    </app-button>
+                  </div>
                 </td>
-              </ng-container>
+              </tr>
+            </tbody>
+          </table>
 
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
+          <div *ngIf="filteredCategories.length === 0" class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <p>No categories found</p>
+            <p class="hint">Try adjusting your search criteria</p>
           </div>
 
-          <mat-paginator 
-            [length]="totalCategories"
-            [pageSize]="pageSize"
-            [pageSizeOptions]="[5, 10, 25, 50]"
-            (page)="onPageChange($event)"
-            showFirstLastButtons>
-          </mat-paginator>
-        </mat-card-content>
-      </mat-card>
+          <div *ngIf="totalPages > 1" class="pagination">
+            <app-button 
+              variant="outline" 
+              size="small"
+              [disabled]="currentPage === 1"
+              (click)="goToPage(currentPage - 1)"
+            >
+              Previous
+            </app-button>
+            
+            <span class="page-info">
+              Page {{currentPage}} of {{totalPages}} ({{filteredCategories.length}} categories)
+            </span>
+            
+            <app-button 
+              variant="outline" 
+              size="small"
+              [disabled]="currentPage === totalPages"
+              (click)="goToPage(currentPage + 1)"
+            >
+              Next
+            </app-button>
+          </div>
+        </div>
+      </app-card>
 
       <!-- Category Statistics -->
       <div class="stats-section">
         <div class="stats-grid">
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon">category</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{totalCategories}}</div>
-                  <div class="stat-label">Total Categories</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{allCategories.length}}</div>
+                <div class="stat-label">Total Categories</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon active">check_circle</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getActiveCategoriesCount()}}</div>
-                  <div class="stat-label">Active Categories</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon active" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getActiveCategoriesCount()}}</div>
+                <div class="stat-label">Active Categories</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon inactive">pause_circle</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getInactiveCategoriesCount()}}</div>
-                  <div class="stat-label">Inactive Categories</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon inactive" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11H7v-2h10v2z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getInactiveCategoriesCount()}}</div>
+                <div class="stat-label">Inactive Categories</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon">inventory</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getTotalProductsCount()}}</div>
-                  <div class="stat-label">Total Products</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4c-1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1 1.1 2 2 2h14c.9 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-1-2-2-2zM15 14H9v-2h6v2zm0-4H9V8h6v2z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getTotalProductsCount()}}</div>
+                <div class="stat-label">Total Products</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
         </div>
       </div>
 
       <!-- Popular Categories -->
-      <mat-card class="popular-categories">
-        <mat-card-header>
-          <mat-card-title>Most Popular Categories</mat-card-title>
-          <mat-card-subtitle>Categories with the most products</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="popular-list">
-            <div *ngFor="let category of getPopularCategories(); let i = index" class="popular-item">
-              <div class="rank-badge">{{i + 1}}</div>
-              <mat-icon class="category-icon">{{getCategoryIcon(category.name)}}</mat-icon>
-              <div class="category-details">
-                <div class="category-name">{{category.name}}</div>
-                <div class="category-stats">{{category.productCount}} products</div>
-              </div>
-              <div class="category-progress">
-                <div class="progress-bar" 
-                     [style.width.%]="(category.productCount / getMaxProductCount()) * 100">
-                </div>
+      <app-card title="Most Popular Categories" subtitle="Categories with the most products" class="popular-categories">
+        <div class="popular-list">
+          <div *ngFor="let category of getPopularCategories(); let i = index" class="popular-item">
+            <div class="rank-badge">{{i + 1}}</div>
+            <svg class="category-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path [attr.d]="getCategoryIconPath(category.name)"/>
+            </svg>
+            <div class="category-details">
+              <div class="category-name">{{category.name}}</div>
+              <div class="category-stats">{{category.productCount}} products</div>
+            </div>
+            <div class="category-progress">
+              <div class="progress-bar" 
+                   [style.width.%]="(category.productCount / getMaxProductCount()) * 100">
               </div>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </app-card>
     </div>
   `,
   styles: [`
     .category-list-container {
       padding: 24px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     .header {
@@ -216,24 +233,56 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
     .header h1 {
       margin: 0;
-      color: #333;
+      color: #1f2937;
+      font-size: 28px;
+      font-weight: 600;
     }
 
     .filters {
       margin-bottom: 24px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
     }
 
-    .search-field {
-      min-width: 300px;
+    .table-wrapper {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
-    .table-container {
-      overflow-x: auto;
-      margin-bottom: 16px;
-    }
-
-    .categories-table {
+    .custom-table {
       width: 100%;
+      border-collapse: collapse;
+    }
+
+    .custom-table thead {
+      background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    }
+
+    .custom-table th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 2px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    .custom-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .table-row {
+      transition: background-color 0.2s ease;
+    }
+
+    .table-row:hover {
+      background-color: #f9fafb;
     }
 
     .category-info {
@@ -246,19 +295,18 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
       display: flex;
       align-items: center;
       gap: 8px;
-      font-weight: 500;
+      color: #1f2937;
+      font-weight: 600;
     }
 
     .category-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      color: #1976d2;
+      color: #2653a6;
     }
 
     .product-count {
-      font-size: 0.85rem;
-      color: #666;
+      font-size: 12px;
+      color: #6b7280;
+      font-style: italic;
     }
 
     .description-text {
@@ -269,20 +317,71 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     }
 
     .status-badge {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.75rem;
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 12px;
       font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .status-badge.active {
-      background-color: #e8f5e8;
-      color: #2e7d32;
+      background-color: #d1fae5;
+      color: #065f46;
     }
 
     .status-badge.inactive {
-      background-color: #ffebee;
-      color: #c62828;
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 4px;
+    }
+
+    .delete-button {
+      color: #ea3b26 !important;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    .empty-state svg {
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      margin: 4px 0;
+      font-size: 16px;
+    }
+
+    .empty-state .hint {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .page-info {
+      font-size: 14px;
+      color: #6b7280;
     }
 
     .stats-section {
@@ -291,38 +390,38 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
     }
 
     .stat-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.3s ease;
     }
 
     .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     .stat-content {
       display: flex;
       align-items: center;
       gap: 16px;
+      padding: 20px;
     }
 
     .stat-icon {
-      font-size: 48px;
-      width: 48px;
-      height: 48px;
-      color: #666;
+      color: #2653a6;
+      flex-shrink: 0;
     }
 
     .stat-icon.active {
-      color: #4caf50;
+      color: #10b981;
     }
 
     .stat-icon.inactive {
-      color: #f44336;
+      color: #ea3b26;
     }
 
     .stat-info {
@@ -330,14 +429,16 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
     }
 
     .stat-number {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #1976d2;
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 4px;
     }
 
     .stat-label {
-      color: #666;
-      font-size: 0.9rem;
+      color: #6b7280;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     .popular-categories {
@@ -348,6 +449,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
       display: flex;
       flex-direction: column;
       gap: 16px;
+      padding: 20px;
     }
 
     .popular-item {
@@ -355,90 +457,112 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
       align-items: center;
       gap: 16px;
       padding: 16px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      transition: background-color 0.2s ease;
+      background-color: #f9fafb;
+      border-radius: 12px;
+      transition: all 0.2s ease;
     }
 
     .popular-item:hover {
-      background-color: #f0f0f0;
+      background-color: #f3f4f6;
+      transform: translateY(-2px);
     }
 
     .rank-badge {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background-color: #1976d2;
+      background: linear-gradient(135deg, #2653a6 0%, #ea3b26 100%);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
-      font-size: 0.9rem;
+      font-weight: 700;
+      font-size: 14px;
     }
 
     .category-details {
       flex: 1;
     }
 
-    .category-name {
-      font-weight: 500;
+    .category-details .category-name {
+      font-weight: 600;
+      color: #1f2937;
       margin-bottom: 4px;
     }
 
     .category-stats {
-      font-size: 0.85rem;
-      color: #666;
+      font-size: 12px;
+      color: #6b7280;
     }
 
     .category-progress {
       width: 100px;
-      height: 6px;
-      background-color: #e0e0e0;
-      border-radius: 3px;
+      height: 8px;
+      background-color: #e5e7eb;
+      border-radius: 4px;
       overflow: hidden;
     }
 
     .progress-bar {
       height: 100%;
-      background-color: #1976d2;
+      background: linear-gradient(90deg, #2653a6 0%, #ea3b26 100%);
       transition: width 0.3s ease;
     }
 
-    .mat-mdc-row:hover {
-      background-color: #f5f5f5;
-    }
-
     @media (max-width: 768px) {
+      .category-list-container {
+        padding: 16px;
+      }
+
       .header {
         flex-direction: column;
         align-items: flex-start;
         gap: 16px;
       }
 
-      .search-field {
-        min-width: auto;
-        width: 100%;
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .custom-table {
+        font-size: 12px;
+      }
+
+      .custom-table th,
+      .custom-table td {
+        padding: 8px 12px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
       }
 
       .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        grid-template-columns: 1fr;
+        gap: 16px;
       }
 
       .stat-content {
         flex-direction: column;
         text-align: center;
-        gap: 8px;
-      }
-
-      .stat-icon {
-        font-size: 36px;
-        width: 36px;
-        height: 36px;
+        gap: 12px;
+        padding: 16px;
       }
 
       .stat-number {
-        font-size: 1.5rem;
+        font-size: 20px;
       }
 
       .popular-item {
