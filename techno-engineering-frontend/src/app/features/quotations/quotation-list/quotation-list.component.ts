@@ -1,23 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
+
+// Import shared components
+import { 
+  SearchInputComponent,
+  ButtonComponent,
+  CardComponent,
+  SelectComponent,
+  ChipComponent,
+  TableComponent
+} from '../../../shared/components';
+
+interface PageEvent {
+  pageIndex: number;
+  pageSize: number;
+  length: number;
+}
 
 @Component({
   selector: 'app-quotation-list',
@@ -26,298 +28,284 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatChipsModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    MatDividerModule
+    SearchInputComponent,
+    ButtonComponent,
+    CardComponent,
+    SelectComponent,
+    ChipComponent,
+    TableComponent
   ],
   template: `
     <div class="quotation-list-container">
       <div class="header">
         <h1>Quotation Management</h1>
         <div class="header-actions">
-          <button mat-raised-button color="primary" routerLink="/quotations/create">
-            <mat-icon>add</mat-icon>
+          <app-button variant="primary" routerLink="/quotations/create">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
             New Quotation
-          </button>
-          <button mat-icon-button [matMenuTriggerFor]="viewMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #viewMenu="matMenu">
-            <button mat-menu-item (click)="exportQuotations()">
-              <mat-icon>download</mat-icon>
-              Export Quotations
-            </button>
-            <button mat-menu-item (click)="refreshData()">
-              <mat-icon>refresh</mat-icon>
-              Refresh
-            </button>
-          </mat-menu>
+          </app-button>
+          <app-button variant="outline" (click)="exportQuotations()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+            </svg>
+            Export
+          </app-button>
+          <app-button variant="outline" (click)="refreshData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+            </svg>
+            Refresh
+          </app-button>
         </div>
       </div>
 
       <!-- Filters -->
-      <mat-card class="filters-card">
-        <mat-card-content>
-          <div class="filters-row">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search quotations</mat-label>
-              <input matInput [formControl]="searchControl" placeholder="Enter quotation number, customer name, or reference">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
+      <app-card title="Filter Quotations" class="filters-card">
+        <div class="filters-row">
+          <app-search-input
+            placeholder="Search by quotation number, customer name, or reference"
+            (search)="onSearch($event)"
+            width="400px"
+          ></app-search-input>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="statusControl" multiple>
-                <mat-option *ngFor="let status of statusOptions" [value]="status.value">
-                  <span class="status-option">
-                    <span class="status-dot" [class]="'status-' + status.value.toString().toLowerCase()"></span>
-                    {{status.label}}
-                  </span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Status"
+            [options]="statusOptions"
+            [multiple]="true"
+            [formControl]="statusControl"
+            width="200px"
+          ></app-select>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Date Range</mat-label>
-              <mat-select [formControl]="dateRangeControl">
-                <mat-option value="today">Today</mat-option>
-                <mat-option value="week">This Week</mat-option>
-                <mat-option value="month">This Month</mat-option>
-                <mat-option value="quarter">This Quarter</mat-option>
-                <mat-option value="year">This Year</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Date Range"
+            [options]="dateRangeOptions"
+            [formControl]="dateRangeControl"
+            width="200px"
+          ></app-select>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Value Range</mat-label>
-              <mat-select [formControl]="valueRangeControl">
-                <mat-option value="0-10000">₹0 - ₹10,000</mat-option>
-                <mat-option value="10000-50000">₹10,000 - ₹50,000</mat-option>
-                <mat-option value="50000-100000">₹50,000 - ₹1,00,000</mat-option>
-                <mat-option value="100000-500000">₹1,00,000 - ₹5,00,000</mat-option>
-                <mat-option value="500000+">₹5,00,000+</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Value Range"
+            [options]="valueRangeOptions"
+            [formControl]="valueRangeControl"
+            width="200px"
+          ></app-select>
 
-            <button mat-button (click)="clearFilters()" class="clear-filters">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
+          <app-button variant="outline" (click)="clearFilters()" class="clear-filters">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41l-1.41-1.41-5.59 5.59-5.59-5.59-1.41 1.41 5.59 5.59-5.59 5.59 1.41 1.41 5.59-5.59 5.59 5.59 1.41-1.41-5.59-5.59z"/>
+            </svg>
+            Clear
+          </app-button>
+        </div>
+
+        <div class="active-filters" *ngIf="hasActiveFilters()">
+          <span class="filter-label">Active filters:</span>
+          <div class="chip-list">
+            <app-chip 
+              *ngFor="let status of getSelectedStatuses()" 
+              (remove)="removeStatusFilter(status)"
+              [removable]="true"
+            >
+              {{getStatusLabel(status)}}
+            </app-chip>
           </div>
-
-          <div class="active-filters" *ngIf="hasActiveFilters()">
-            <span class="filter-label">Active filters:</span>
-            <mat-chip-set>
-              <mat-chip *ngFor="let status of getSelectedStatuses()" (removed)="removeStatusFilter(status)">
-                {{getStatusLabel(status)}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-            </mat-chip-set>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </app-card>
 
       <!-- Statistics Cards -->
       <div class="stats-section">
         <div class="stats-grid">
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon">description</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{totalQuotations}}</div>
-                  <div class="stat-label">Total Quotations</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{totalQuotations}}</div>
+                <div class="stat-label">Total Quotations</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon draft">schedule</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getQuotationsByStatus('Draft')}}</div>
-                  <div class="stat-label">Draft</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon draft" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getQuotationsByStatus('Draft')}}</div>
+                <div class="stat-label">Draft</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon sent">send</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getQuotationsByStatus('Sent')}}</div>
-                  <div class="stat-label">Sent</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon sent" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getQuotationsByStatus('Sent')}}</div>
+                <div class="stat-label">Sent</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon accepted">check_circle</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getQuotationsByStatus('Accepted')}}</div>
-                  <div class="stat-label">Accepted</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon accepted" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getQuotationsByStatus('Accepted')}}</div>
+                <div class="stat-label">Accepted</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card value-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon currency">trending_up</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">₹{{getTotalValue() | number:'1.0-0'}}</div>
-                  <div class="stat-label">Total Value</div>
-                </div>
+          <app-card class="stat-card value-card">
+            <div class="stat-content">
+              <svg class="stat-icon currency" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16,6L18.29,8.29L13.41,13.17L9.41,9.17L2,16.59L3.41,18L9.41,12L13.41,16L19.71,9.71L22,12V6H16Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">₹{{getTotalValue() | number:'1.0-0'}}</div>
+                <div class="stat-label">Total Value</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
         </div>
       </div>
 
       <!-- Quotations Table -->
-      <mat-card>
-        <div class="table-container">
-          <table mat-table [dataSource]="quotations" class="quotations-table">
-            <ng-container matColumnDef="quotationNumber">
-              <th mat-header-cell *matHeaderCellDef>Quotation #</th>
-              <td mat-cell *matCellDef="let quotation">
-                <div class="quotation-number">
-                  <a [routerLink]="['/quotations/view', quotation.id]" class="quotation-link">
-                    {{quotation.quotationNumber}}
-                  </a>
-                  <div class="quotation-date">{{quotation.quotationDate | date:'short'}}</div>
-                </div>
-              </td>
-            </ng-container>
+      <app-card>
+        <app-table
+          [data]="quotations"
+          [columns]="tableColumns"
+          [searchable]="false"
+          [sortable]="true"
+        >
+          <ng-template #quotationNumberTemplate let-quotation>
+            <div class="quotation-number">
+              <a [routerLink]="['/quotations/view', quotation.id]" class="quotation-link">
+                {{quotation.quotationNumber}}
+              </a>
+              <div class="quotation-date">{{quotation.quotationDate | date:'short'}}</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="customer">
-              <th mat-header-cell *matHeaderCellDef>Customer</th>
-              <td mat-cell *matCellDef="let quotation">
-                <div class="customer-info">
-                  <div class="customer-name">{{quotation.customerName}}</div>
-                  <div class="customer-org" *ngIf="quotation.customerOrganization">{{quotation.customerOrganization}}</div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #customerTemplate let-quotation>
+            <div class="customer-info">
+              <div class="customer-name">{{quotation.customerName}}</div>
+              <div class="customer-org" *ngIf="quotation.customerOrganization">{{quotation.customerOrganization}}</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="reference">
-              <th mat-header-cell *matHeaderCellDef>Reference</th>
-              <td mat-cell *matCellDef="let quotation">
-                <div class="reference-info">
-                  <div class="reference-title">{{quotation.reference || 'No Reference'}}</div>
-                  <div class="item-count">{{quotation.lineItems?.length || 0}} items</div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #referenceTemplate let-quotation>
+            <div class="reference-info">
+              <div class="reference-title">{{quotation.reference || 'No Reference'}}</div>
+              <div class="item-count">{{quotation.quotationItems?.length || 0}} items</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let quotation">
-                <span class="status-badge" [class]="'status-' + getStatusClass(quotation.status)">
-                  {{getStatusLabel(quotation.status)}}
-                </span>
-              </td>
-            </ng-container>
+          <ng-template #statusTemplate let-quotation>
+            <span class="status-badge" [class]="'status-' + getStatusClass(quotation.status)">
+              {{getStatusLabel(quotation.status)}}
+            </span>
+          </ng-template>
 
-            <ng-container matColumnDef="totalAmount">
-              <th mat-header-cell *matHeaderCellDef>Total Amount</th>
-              <td mat-cell *matCellDef="let quotation">
-                <div class="amount-info">
-                  <div class="total-amount">₹{{quotation.grandTotal | number:'1.0-0'}}</div>
-                  <div class="tax-amount">Incl. GST</div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #totalAmountTemplate let-quotation>
+            <div class="amount-info">
+              <div class="total-amount">₹{{quotation.grandTotal | number:'1.0-0'}}</div>
+              <div class="tax-amount">Incl. GST</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="validUntil">
-              <th mat-header-cell *matHeaderCellDef>Valid Until</th>
-              <td mat-cell *matCellDef="let quotation">
-                <div class="validity-info">
-                  <div class="validity-date">{{quotation.validUntil | date:'shortDate'}}</div>
-                  <div class="validity-status" [class]="getValidityClass(quotation.validUntil)">
-                    {{getValidityStatus(quotation.validUntil)}}
-                  </div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #validUntilTemplate let-quotation>
+            <div class="validity-info">
+              <div class="validity-date">{{quotation.validUntil | date:'shortDate'}}</div>
+              <div class="validity-status" [class]="getValidityClass(quotation.validUntil)">
+                {{getValidityStatus(quotation.validUntil)}}
+              </div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let quotation">
-                <button mat-icon-button [routerLink]="['/quotations/view', quotation.id]" 
-                        matTooltip="View Details" color="primary">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button [routerLink]="['/quotations/edit', quotation.id]" 
-                        matTooltip="Edit Quotation" color="accent"
-                        [disabled]="quotation.status === QuotationStatus.Accepted">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button [matMenuTriggerFor]="actionMenu" 
-                        matTooltip="More Actions">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #actionMenu="matMenu">
-                  <button mat-menu-item (click)="downloadPDF(quotation.id)">
-                    <mat-icon>download</mat-icon>
-                    Download PDF
-                  </button>
-                  <button mat-menu-item (click)="sendEmail(quotation.id)" 
-                          [disabled]="quotation.status === QuotationStatus.Draft">
-                    <mat-icon>email</mat-icon>
-                    Send Email
-                  </button>
-                  <button mat-menu-item (click)="duplicateQuotation(quotation.id)">
-                    <mat-icon>content_copy</mat-icon>
-                    Duplicate
-                  </button>
-                  <button mat-menu-item (click)="createRevision(quotation.id)"
-                          [disabled]="quotation.status !== QuotationStatus.Sent">
-                    <mat-icon>edit_note</mat-icon>
-                    Create Revision
-                  </button>
-                  <mat-divider></mat-divider>
-                  <button mat-menu-item (click)="deleteQuotation(quotation.id)" color="warn"
-                          [disabled]="quotation.status === QuotationStatus.Accepted">
-                    <mat-icon>delete</mat-icon>
-                    Delete
-                  </button>
-                </mat-menu>
-              </td>
-            </ng-container>
+          <ng-template #actionsTemplate let-quotation>
+            <div class="action-buttons">
+              <app-button 
+                variant="outline" 
+                size="small" 
+                [routerLink]="['/quotations/view', quotation.id]"
+                title="View Details"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small" 
+                [routerLink]="['/quotations/edit', quotation.id]"
+                title="Edit Quotation"
+                [disabled]="quotation.status === QuotationStatus.Accepted"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small" 
+                (click)="downloadPDF(quotation.id)"
+                title="Download PDF"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small" 
+                (click)="deleteQuotation(quotation.id)"
+                title="Delete Quotation"
+                class="delete-button"
+                [disabled]="quotation.status === QuotationStatus.Accepted"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+              </app-button>
+            </div>
+          </ng-template>
+        </app-table>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+        <!-- Pagination -->
+        <div *ngIf="totalQuotations > pageSize" class="pagination">
+          <app-button 
+            variant="outline" 
+            size="small"
+            [disabled]="currentPage === 0"
+            (click)="goToPage(currentPage - 1)"
+          >
+            Previous
+          </app-button>
+          
+          <span class="page-info">
+            Page {{currentPage + 1}} of {{totalPages}} ({{totalQuotations}} quotations)
+          </span>
+          
+          <app-button 
+            variant="outline" 
+            size="small"
+            [disabled]="currentPage === totalPages - 1"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Next
+          </app-button>
         </div>
-
-        <mat-paginator 
-          [length]="totalQuotations"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 25, 50, 100]"
-          (page)="onPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </mat-card>
+      </app-card>
     </div>
   `,
   styles: [`
@@ -334,7 +322,12 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
 
     .header h1 {
       margin: 0;
-      color: #333;
+      background: linear-gradient(135deg, #2653a6 0%, #ea3b26 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      font-size: 2rem;
     }
 
     .header-actions {
@@ -354,10 +347,6 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
       flex-wrap: wrap;
     }
 
-    .search-field {
-      flex: 1;
-      min-width: 300px;
-    }
 
     .clear-filters {
       white-space: nowrap;
@@ -371,8 +360,15 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
     }
 
     .filter-label {
-      font-weight: 500;
-      color: #666;
+      font-weight: 600;
+      color: #2653a6;
+      margin-right: 8px;
+    }
+
+    .chip-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .status-option {
@@ -381,17 +377,6 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
       gap: 8px;
     }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .status-dot.status-draft { background-color: #9e9e9e; }
-    .status-dot.status-sent { background-color: #2196f3; }
-    .status-dot.status-accepted { background-color: #4caf50; }
-    .status-dot.status-rejected { background-color: #f44336; }
-    .status-dot.status-expired { background-color: #ff9800; }
 
     .stats-section {
       margin-bottom: 24px;
@@ -419,10 +404,10 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
     }
 
     .stat-icon {
-      font-size: 48px;
       width: 48px;
       height: 48px;
       color: #666;
+      flex-shrink: 0;
     }
 
     .stat-icon.draft { color: #9e9e9e; }
@@ -449,12 +434,13 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
       font-size: 0.9rem;
     }
 
-    .table-container {
-      overflow-x: auto;
+    .action-buttons {
+      display: flex;
+      gap: 8px;
     }
 
-    .quotations-table {
-      width: 100%;
+    .delete-button {
+      color: #ea3b26 !important;
     }
 
     .quotation-number {
@@ -587,8 +573,17 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
       color: #f44336;
     }
 
-    .mat-mdc-row:hover {
-      background-color: #f5f5f5;
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      margin-top: 24px;
+    }
+
+    .page-info {
+      font-size: 14px;
+      color: #6b7280;
     }
 
     @media (max-width: 768px) {
@@ -603,9 +598,6 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
         align-items: stretch;
       }
 
-      .search-field {
-        min-width: auto;
-      }
 
       .stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -629,8 +621,16 @@ import { QuotationDto, QuotationStatus } from '../../../models/quotation.dto';
     }
   `]
 })
-export class QuotationListComponent implements OnInit {
-  displayedColumns: string[] = ['quotationNumber', 'customer', 'reference', 'status', 'totalAmount', 'validUntil', 'actions'];
+export class QuotationListComponent implements OnInit, AfterViewInit {
+  @ViewChild('quotationNumberTemplate', { static: true }) quotationNumberTemplate!: TemplateRef<any>;
+  @ViewChild('customerTemplate', { static: true }) customerTemplate!: TemplateRef<any>;
+  @ViewChild('referenceTemplate', { static: true }) referenceTemplate!: TemplateRef<any>;
+  @ViewChild('statusTemplate', { static: true }) statusTemplate!: TemplateRef<any>;
+  @ViewChild('totalAmountTemplate', { static: true }) totalAmountTemplate!: TemplateRef<any>;
+  @ViewChild('validUntilTemplate', { static: true }) validUntilTemplate!: TemplateRef<any>;
+  @ViewChild('actionsTemplate', { static: true }) actionsTemplate!: TemplateRef<any>;
+
+  tableColumns: any[] = [];
   
   searchControl = new FormControl('');
   statusControl = new FormControl<QuotationStatus[]>([]);
@@ -650,23 +650,52 @@ export class QuotationListComponent implements OnInit {
     { value: QuotationStatus.Expired, label: 'Expired' }
   ];
 
+  dateRangeOptions = [
+    { value: 'today', label: 'Today' },
+    { value: 'week', label: 'This Week' },
+    { value: 'month', label: 'This Month' },
+    { value: 'quarter', label: 'This Quarter' },
+    { value: 'year', label: 'This Year' }
+  ];
+
+  valueRangeOptions = [
+    { value: '0-10000', label: '₹0 - ₹10,000' },
+    { value: '10000-50000', label: '₹10,000 - ₹50,000' },
+    { value: '50000-100000', label: '₹50,000 - ₹1,00,000' },
+    { value: '100000-500000', label: '₹1,00,000 - ₹5,00,000' },
+    { value: '500000+', label: '₹5,00,000+' }
+  ];
+
   QuotationStatus = QuotationStatus;
 
-  constructor(
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
+  get totalPages(): number {
+    return Math.ceil(this.totalQuotations / this.pageSize);
+  }
+
+  constructor() {}
 
   ngOnInit() {
     this.loadMockData();
     this.setupFilters();
   }
 
-  private setupFilters() {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.applyFilters());
+  ngAfterViewInit() {
+    this.tableColumns = [
+      { key: 'quotationNumber', title: 'Quotation #', label: 'Quotation #', template: this.quotationNumberTemplate },
+      { key: 'customer', title: 'Customer', label: 'Customer', template: this.customerTemplate },
+      { key: 'reference', title: 'Reference', label: 'Reference', template: this.referenceTemplate },
+      { key: 'status', title: 'Status', label: 'Status', template: this.statusTemplate },
+      { key: 'totalAmount', title: 'Total Amount', label: 'Total Amount', template: this.totalAmountTemplate },
+      { key: 'validUntil', title: 'Valid Until', label: 'Valid Until', template: this.validUntilTemplate },
+      { key: 'actions', title: 'Actions', label: 'Actions', template: this.actionsTemplate }
+    ];
+  }
 
+  onSearch(searchTerm: string): void {
+    this.applyFilters();
+  }
+
+  private setupFilters() {
     this.statusControl.valueChanges.subscribe(() => this.applyFilters());
     this.dateRangeControl.valueChanges.subscribe(() => this.applyFilters());
     this.valueRangeControl.valueChanges.subscribe(() => this.applyFilters());
@@ -837,6 +866,13 @@ export class QuotationListComponent implements OnInit {
     this.applyFilters();
   }
 
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.applyFilters();
+    }
+  }
+
   clearFilters() {
     this.searchControl.setValue('');
     this.statusControl.setValue([]);
@@ -895,33 +931,33 @@ export class QuotationListComponent implements OnInit {
   }
 
   downloadPDF(quotationId: number) {
-    this.snackBar.open('Downloading PDF...', 'Close', { duration: 2000 });
+    console.log('Downloading PDF for quotation:', quotationId);
   }
 
   sendEmail(quotationId: number) {
-    this.snackBar.open('Sending quotation via email...', 'Close', { duration: 2000 });
+    console.log('Sending quotation via email:', quotationId);
   }
 
   duplicateQuotation(quotationId: number) {
-    this.snackBar.open('Duplicating quotation...', 'Close', { duration: 2000 });
+    console.log('Duplicating quotation:', quotationId);
   }
 
   createRevision(quotationId: number) {
-    this.snackBar.open('Creating revision...', 'Close', { duration: 2000 });
+    console.log('Creating revision for quotation:', quotationId);
   }
 
   deleteQuotation(quotationId: number) {
     if (confirm('Are you sure you want to delete this quotation?')) {
-      this.snackBar.open('Quotation deleted successfully', 'Close', { duration: 3000 });
+      console.log('Quotation deleted:', quotationId);
     }
   }
 
   exportQuotations() {
-    this.snackBar.open('Exporting all quotations...', 'Close', { duration: 2000 });
+    console.log('Exporting all quotations');
   }
 
   refreshData() {
     this.loadMockData();
-    this.snackBar.open('Data refreshed', 'Close', { duration: 2000 });
+    console.log('Data refreshed');
   }
 }

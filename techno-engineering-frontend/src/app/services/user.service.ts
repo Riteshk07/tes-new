@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseResponse, BaseListResponse, FilterBase } from '../models/base.dto';
-import { UserDto, CreateUserDto } from '../models/user.dto';
-import { environment } from '../environments/environment';
+import { UserDto, UserRegisterDto } from '../models/user.dto';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  upsertUser(user: CreateUserDto): Observable<BaseResponse<UserDto>> {
+  upsertUser(user: UserRegisterDto): Observable<BaseResponse<UserDto>> {
     return this.http.post<BaseResponse<UserDto>>(`${this.baseUrl}/upsert`, user);
   }
 

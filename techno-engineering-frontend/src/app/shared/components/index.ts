@@ -18,4 +18,6 @@ export { TableComponent } from './table/table.component';
 export type { TableColumn, TableAction } from './table/table.component';
 export { CardComponent } from './card/card.component';
 export { ExpansionPanelComponent } from './expansion-panel/expansion-panel.component';
+export { DropdownComponent } from './dropdown/dropdown.component';
+export type { DropdownItem } from './dropdown/dropdown.component';
 export { InputDemoComponent } from './input-demo/input-demo.component';

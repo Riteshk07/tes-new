@@ -173,6 +173,7 @@ export class TableComponent implements AfterContentInit {
   @Input() width: string = '100%';
   @Input() title: string = '';
   @Input() searchable: boolean = false;
+  @Input() sortable: boolean = false;
   @Input() addButtonLabel: string = '';
   @Input() emptyMessage: string = '';
   @Input() pagination: boolean = false;

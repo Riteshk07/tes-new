@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { BaseResponse, BaseListResponse, FilterBase } from '../models/base.dto';
 import { QuotationDto, CreateQuotationDto, UpdateQuotationDto, QuotationSummaryDto, QuotationTemplateDto, QuotationStatus } from '../models/quotation.dto';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'

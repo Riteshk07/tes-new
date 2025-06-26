@@ -1,19 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
+// Import shared components
+import { 
+  SearchInputComponent,
+  ButtonComponent,
+  CardComponent,
+  SelectComponent,
+  ChipComponent,
+  TableComponent
+} from '../../../shared/components';
 
 interface ProductFilter {
   pageNumber: number;
@@ -31,205 +30,291 @@ interface ProductFilter {
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatChipsModule,
-    MatMenuModule,
-    MatCheckboxModule
+    SearchInputComponent,
+    ButtonComponent,
+    CardComponent,
+    SelectComponent,
+    ChipComponent,
+    TableComponent
   ],
   template: `
     <div class="product-list-container">
       <div class="header">
         <h1>Products</h1>
         <div class="header-actions">
-          <button mat-raised-button color="primary" routerLink="/products/create">
-            <mat-icon>add</mat-icon>
+          <app-button variant="primary" routerLink="/products/create">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
             Add Product
-          </button>
-          <button mat-icon-button [matMenuTriggerFor]="viewMenu">
-            <mat-icon>view_module</mat-icon>
-          </button>
-          <mat-menu #viewMenu="matMenu">
-            <button mat-menu-item (click)="viewMode = 'table'" [class.active]="viewMode === 'table'">
-              <mat-icon>table_rows</mat-icon>
-              Table View
-            </button>
-            <button mat-menu-item (click)="viewMode = 'grid'" [class.active]="viewMode === 'grid'">
-              <mat-icon>grid_view</mat-icon>
-              Grid View
-            </button>
-          </mat-menu>
+          </app-button>
+          <app-button 
+            variant="outline"
+            [class.active]="viewMode === 'table'"
+            (click)="viewMode = 'table'"
+            title="Table View"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/>
+            </svg>
+          </app-button>
+          <app-button 
+            variant="outline"
+            [class.active]="viewMode === 'grid'"
+            (click)="viewMode = 'grid'"
+            title="Grid View"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 3v8h8V3H3zm6 6H5V5h4v4zm-6 4v8h8v-8H3zm6 6H5v-4h4v4zm4-16v8h8V3h-8zm6 6h-4V5h4v4zm-6 4v8h8v-8h-8zm6 6h-4v-4h4v4z"/>
+            </svg>
+          </app-button>
+          <app-button variant="outline" (click)="refreshData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+            </svg>
+            Refresh
+          </app-button>
         </div>
       </div>
 
-      <mat-card class="filters-card">
-        <mat-card-content>
-          <div class="filters-row">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search products</mat-label>
-              <input matInput [formControl]="searchControl" placeholder="Enter product name, model, or description">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
+      <!-- Filters -->
+      <app-card title="Product Filters" class="filters-card">
+        <div class="filters-row">
+          <app-search-input
+            placeholder="Search products by name, model, or description"
+            (search)="onSearch($event)"
+            width="400px"
+          ></app-search-input>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Brand</mat-label>
-              <mat-select [formControl]="brandControl" multiple>
-                <mat-option *ngFor="let brand of brands" [value]="brand.id">
-                  {{brand.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Select brands"
+            [options]="brandOptions"
+            [multiple]="true"
+            [formControl]="brandControl"
+            width="200px"
+          ></app-select>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Category</mat-label>
-              <mat-select [formControl]="categoryControl" multiple>
-                <mat-option *ngFor="let category of categories" [value]="category.id">
-                  {{category.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Select categories"
+            [options]="categoryOptions"
+            [multiple]="true"
+            [formControl]="categoryControl"
+            width="200px"
+          ></app-select>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Color</mat-label>
-              <mat-select [formControl]="colorControl" multiple>
-                <mat-option *ngFor="let color of colors" [value]="color.id">
-                  <span class="color-option">
-                    <span class="color-dot" [style.background-color]="color.hex"></span>
-                    {{color.name}}
-                  </span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Select colors"
+            [options]="colorOptions"
+            [multiple]="true"
+            [formControl]="colorControl"
+            width="200px"
+          ></app-select>
 
-            <button mat-button (click)="clearFilters()" class="clear-filters">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
+          <app-button variant="outline" (click)="clearFilters()" class="clear-filters">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41l-1.41-1.41-5.59 5.59-5.59-5.59-1.41 1.41 5.59 5.59-5.59 5.59 1.41 1.41 5.59-5.59 5.59 5.59 1.41-1.41-5.59-5.59z"/>
+            </svg>
+            Clear
+          </app-button>
+        </div>
+
+        <div class="active-filters" *ngIf="hasActiveFilters()">
+          <span class="filter-label">Active filters:</span>
+          <div class="chip-list">
+            <app-chip 
+              *ngFor="let brandId of getSelectedBrands()" 
+              (remove)="removeBrandFilter(brandId)"
+              [removable]="true"
+            >
+              {{getBrandName(brandId)}}
+            </app-chip>
+            <app-chip 
+              *ngFor="let categoryId of getSelectedCategories()" 
+              (remove)="removeCategoryFilter(categoryId)"
+              [removable]="true"
+            >
+              {{getCategoryName(categoryId)}}
+            </app-chip>
+            <app-chip 
+              *ngFor="let colorId of getSelectedColors()" 
+              (remove)="removeColorFilter(colorId)"
+              [removable]="true"
+            >
+              {{getColorName(colorId)}}
+            </app-chip>
           </div>
+        </div>
+      </app-card>
 
-          <div class="active-filters" *ngIf="hasActiveFilters()">
-            <span class="filter-label">Active filters:</span>
-            <mat-chip-set>
-              <mat-chip *ngFor="let brandId of filter.brandIds" (removed)="removeBrandFilter(brandId)">
-                {{getBrandName(brandId)}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-              <mat-chip *ngFor="let categoryId of filter.categoryIds" (removed)="removeCategoryFilter(categoryId)">
-                {{getCategoryName(categoryId)}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-              <mat-chip *ngFor="let colorId of filter.colorIds" (removed)="removeColorFilter(colorId)">
-                {{getColorName(colorId)}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-            </mat-chip-set>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <!-- Statistics Cards -->
+      <div class="stats-section">
+        <div class="stats-grid">
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{totalProducts}}</div>
+                <div class="stat-label">Total Products</div>
+              </div>
+            </div>
+          </app-card>
+
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon active" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getActiveProducts()}}</div>
+                <div class="stat-label">Active</div>
+              </div>
+            </div>
+          </app-card>
+
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon inactive" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getInactiveProducts()}}</div>
+                <div class="stat-label">Inactive</div>
+              </div>
+            </div>
+          </app-card>
+
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon brands" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,7L13.09,10.26L16.5,11L13.09,11.74L12,15L10.91,11.74L7.5,11L10.91,10.26L12,7M12,2L14.39,8.26L22,9L14.39,9.74L12,16L9.61,9.74L2,9L9.61,8.26L12,2Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getTotalBrands()}}</div>
+                <div class="stat-label">Brands</div>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </div>
 
       <!-- Table View -->
-      <mat-card *ngIf="viewMode === 'table'">
-        <div class="table-container">
-          <table mat-table [dataSource]="products" class="products-table">
-            <ng-container matColumnDef="image">
-              <th mat-header-cell *matHeaderCellDef>Image</th>
-              <td mat-cell *matCellDef="let product">
-                <div class="product-image">
-                  <img [src]="getProductImage(product)" [alt]="product.name" 
-                       onerror="this.src='assets/images/no-image.png'">
-                </div>
-              </td>
-            </ng-container>
+      <app-card *ngIf="viewMode === 'table'">
+        <app-table
+          [data]="filteredProducts"
+          [columns]="tableColumns"
+          [searchable]="false"
+          [sortable]="true"
+        >
+          <ng-template #imageTemplate let-product>
+            <div class="product-image">
+              <img [src]="getProductImage(product)" [alt]="product.name" 
+                   onerror="this.src='assets/images/no-image.png'">
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef>Product</th>
-              <td mat-cell *matCellDef="let product">
-                <div class="product-info">
-                  <div class="product-name">{{product.name}}</div>
-                  <div class="product-model">{{product.modelNumber}}</div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #nameTemplate let-product>
+            <div class="product-info">
+              <div class="product-name">{{product.name}}</div>
+              <div class="product-model">{{product.modelNumber}}</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="brand">
-              <th mat-header-cell *matHeaderCellDef>Brand</th>
-              <td mat-cell *matCellDef="let product">{{product.brand}}</td>
-            </ng-container>
+          <ng-template #colorTemplate let-product>
+            <span class="color-display" *ngIf="product.color">
+              <span class="color-dot" [style.background-color]="getColorHex(product.colorId)"></span>
+              {{product.color}}
+            </span>
+            <span *ngIf="!product.color">-</span>
+          </ng-template>
 
-            <ng-container matColumnDef="category">
-              <th mat-header-cell *matHeaderCellDef>Category</th>
-              <td mat-cell *matCellDef="let product">{{product.category}}</td>
-            </ng-container>
+          <ng-template #statusTemplate let-product>
+            <span class="status-badge" [class.active]="product.isActive" [class.inactive]="!product.isActive">
+              {{product.isActive ? 'Active' : 'Inactive'}}
+            </span>
+          </ng-template>
 
-            <ng-container matColumnDef="color">
-              <th mat-header-cell *matHeaderCellDef>Color</th>
-              <td mat-cell *matCellDef="let product">
-                <span class="color-display" *ngIf="product.color">
-                  <span class="color-dot" [style.background-color]="getColorHex(product.colorId)"></span>
-                  {{product.color}}
-                </span>
-                <span *ngIf="!product.color">-</span>
-              </td>
-            </ng-container>
+          <ng-template #actionsTemplate let-product>
+            <div class="action-buttons">
+              <app-button 
+                variant="outline" 
+                size="small"
+                [routerLink]="['/products/view', product.id]"
+                title="View Product"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small"
+                [routerLink]="['/products/edit', product.id]"
+                title="Edit Product"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small"
+                (click)="deleteProduct(product.id)"
+                title="Delete Product"
+                class="delete-button"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+              </app-button>
+            </div>
+          </ng-template>
+        </app-table>
 
-            <ng-container matColumnDef="minQuantity">
-              <th mat-header-cell *matHeaderCellDef>Min Qty</th>
-              <td mat-cell *matCellDef="let product">{{product.minimumBuyingQuantity}}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let product">
-                <span class="status-badge" [class.active]="product.isActive" [class.inactive]="!product.isActive">
-                  {{product.isActive ? 'Active' : 'Inactive'}}
-                </span>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let product">
-                <button mat-icon-button [routerLink]="['/products/view', product.id]" color="primary">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button [routerLink]="['/products/edit', product.id]" color="accent">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button (click)="deleteProduct(product.id)" color="warn">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+        <!-- Pagination -->
+        <div *ngIf="totalPages > 1" class="pagination">
+          <app-button 
+            variant="outline" 
+            size="small"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)"
+          >
+            Previous
+          </app-button>
+          
+          <span class="page-info">
+            Page {{currentPage}} of {{totalPages}} ({{filteredProducts.length}} products)
+          </span>
+          
+          <app-button 
+            variant="outline" 
+            size="small"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Next
+          </app-button>
         </div>
-      </mat-card>
+      </app-card>
 
       <!-- Grid View -->
       <div class="products-grid" *ngIf="viewMode === 'grid'">
-        <mat-card *ngFor="let product of products" class="product-card">
+        <app-card *ngFor="let product of filteredProducts" class="product-card">
           <div class="product-image-container">
-            <img mat-card-image [src]="getProductImage(product)" [alt]="product.name"
+            <img [src]="getProductImage(product)" [alt]="product.name"
                  onerror="this.src='assets/images/no-image.png'">
             <div class="product-status" [class.active]="product.isActive" [class.inactive]="!product.isActive">
               {{product.isActive ? 'Active' : 'Inactive'}}
             </div>
           </div>
           
-          <mat-card-header>
-            <mat-card-title>{{product.name}}</mat-card-title>
-            <mat-card-subtitle>{{product.modelNumber}}</mat-card-subtitle>
-          </mat-card-header>
+          <div class="product-header">
+            <h3 class="product-title">{{product.name}}</h3>
+            <p class="product-subtitle">{{product.modelNumber}}</p>
+          </div>
           
-          <mat-card-content>
+          <div class="product-content">
             <div class="product-details">
               <div class="detail-item">
                 <strong>Brand:</strong> {{product.brand}}
@@ -248,28 +333,41 @@ interface ProductFilter {
                 <strong>Min Quantity:</strong> {{product.minimumBuyingQuantity}}
               </div>
             </div>
-          </mat-card-content>
+          </div>
           
-          <mat-card-actions>
-            <button mat-button [routerLink]="['/products/view', product.id]" color="primary">
-              <mat-icon>visibility</mat-icon>
+          <div class="product-actions">
+            <app-button 
+              variant="outline" 
+              size="small"
+              [routerLink]="['/products/view', product.id]"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+              </svg>
               View
-            </button>
-            <button mat-button [routerLink]="['/products/edit', product.id]" color="accent">
-              <mat-icon>edit</mat-icon>
+            </app-button>
+            <app-button 
+              variant="outline" 
+              size="small"
+              [routerLink]="['/products/edit', product.id]"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+              </svg>
               Edit
-            </button>
-          </mat-card-actions>
-        </mat-card>
+            </app-button>
+          </div>
+        </app-card>
       </div>
 
-      <mat-paginator 
-        [length]="totalProducts"
-        [pageSize]="filter.take"
-        [pageSizeOptions]="[12, 24, 48, 96]"
-        (page)="onPageChange($event)"
-        showFirstLastButtons>
-      </mat-paginator>
+      <!-- Empty State -->
+      <div *ngIf="filteredProducts.length === 0" class="empty-state">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <p>No products found</p>
+        <p class="hint">Try adjusting your search criteria or add some products</p>
+      </div>
     </div>
   `,
   styles: [`
@@ -302,21 +400,6 @@ interface ProductFilter {
 
     .filters-card {
       margin-bottom: 24px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 249, 250, 0.9) 100%);
-      border: 1px solid rgba(38, 83, 166, 0.1);
-      box-shadow: 0 4px 12px rgba(38, 83, 166, 0.08);
-      backdrop-filter: blur(10px);
-      
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #2653a6 0%, #ea3b26 100%);
-        border-radius: 16px 16px 0 0;
-      }
     }
 
     .filters-row {
@@ -324,11 +407,7 @@ interface ProductFilter {
       gap: 16px;
       align-items: center;
       flex-wrap: wrap;
-    }
-
-    .search-field {
-      flex: 1;
-      min-width: 300px;
+      margin-bottom: 16px;
     }
 
     .clear-filters {
@@ -336,7 +415,6 @@ interface ProductFilter {
     }
 
     .active-filters {
-      margin-top: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -345,16 +423,69 @@ interface ProductFilter {
     .filter-label {
       font-weight: 600;
       color: #2653a6;
-      background: linear-gradient(135deg, #2653a6 0%, #ea3b26 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      margin-right: 8px;
     }
 
-    .color-option {
+    .chip-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .header-actions .active {
+      background-color: #2653a6;
+      color: white;
+    }
+
+    .stats-section {
+      margin-bottom: 24px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .stat-content {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 16px;
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      color: #666;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.active { color: #4caf50; }
+    .stat-icon.inactive { color: #f44336; }
+    .stat-icon.brands { color: #ff9800; }
+
+    .stat-info {
+      flex: 1;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1976d2;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
     }
 
     .color-dot {
@@ -371,19 +502,21 @@ interface ProductFilter {
       gap: 8px;
     }
 
-    .table-container {
-      overflow-x: auto;
+    .action-buttons {
+      display: flex;
+      gap: 8px;
     }
 
-    .products-table {
-      width: 100%;
+    .delete-button {
+      color: #ea3b26 !important;
     }
 
     .product-image {
       width: 50px;
       height: 50px;
       overflow: hidden;
-      border-radius: 4px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .product-image img {
@@ -436,42 +569,55 @@ interface ProductFilter {
     .product-card {
       position: relative;
       transition: all 0.3s ease;
-      border: 1px solid rgba(75, 73, 76, 0.1);
       overflow: hidden;
-      
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #2653a6 0%, #ea3b26 100%);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
-      }
-      
-      &:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 32px rgba(38, 83, 166, 0.15);
-        border-color: rgba(38, 83, 166, 0.2);
-      }
-      
-      &:hover::before {
-        transform: scaleX(1);
-      }
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(38, 83, 166, 0.15);
     }
 
     .product-image-container {
       position: relative;
       height: 200px;
       overflow: hidden;
+      border-radius: 12px 12px 0 0;
     }
 
     .product-image-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+
+    .product-header {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .product-title {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .product-subtitle {
+      margin: 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .product-content {
+      padding: 16px;
+    }
+
+    .product-actions {
+      padding: 16px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
     }
 
     .product-status {
@@ -485,17 +631,13 @@ interface ProductFilter {
     }
 
     .product-status.active {
-      background: linear-gradient(135deg, rgba(76, 175, 80, 0.95) 0%, rgba(46, 125, 50, 0.95) 100%);
+      background: #10b981;
       color: white;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .product-status.inactive {
-      background: linear-gradient(135deg, rgba(234, 59, 38, 0.95) 0%, rgba(198, 40, 40, 0.95) 100%);
+      background: #ea3b26;
       color: white;
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .product-details {
@@ -517,98 +659,176 @@ interface ProductFilter {
       font-weight: 600;
     }
 
-    .mat-mdc-row:hover {
-      background-color: #f5f5f5;
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      margin-top: 24px;
+    }
+
+    .page-info {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    .empty-state svg {
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      margin: 4px 0;
+      font-size: 16px;
+    }
+
+    .empty-state .hint {
+      font-size: 14px;
+      color: #6b7280;
     }
 
     @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+      }
+
       .filters-row {
         flex-direction: column;
         align-items: stretch;
       }
 
-      .search-field {
-        min-width: auto;
-      }
-
       .products-grid {
         grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+
+      .stat-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+      }
+
+      .stat-icon {
+        width: 36px;
+        height: 36px;
+      }
+
+      .stat-number {
+        font-size: 1.5rem;
       }
     }
   `]
 })
 export class ProductListComponent implements OnInit {
+  @ViewChild('imageTemplate', { static: true }) imageTemplate!: TemplateRef<any>;
+  @ViewChild('nameTemplate', { static: true }) nameTemplate!: TemplateRef<any>;
+  @ViewChild('colorTemplate', { static: true }) colorTemplate!: TemplateRef<any>;
+  @ViewChild('statusTemplate', { static: true }) statusTemplate!: TemplateRef<any>;
+  @ViewChild('actionsTemplate', { static: true }) actionsTemplate!: TemplateRef<any>;
+
   viewMode: 'table' | 'grid' = 'table';
-  displayedColumns: string[] = ['image', 'name', 'brand', 'category', 'color', 'minQuantity', 'status', 'actions'];
   
   searchControl = new FormControl('');
   brandControl = new FormControl<number[]>([]);
   categoryControl = new FormControl<number[]>([]);
   colorControl = new FormControl<number[]>([]);
 
-  filter: ProductFilter = {
-    pageNumber: 1,
-    take: 12,
-    search: '',
-    brandIds: [],
-    categoryIds: [],
-    colorIds: []
-  };
-
+  tableColumns: any[] = [];
+  
   products: any[] = [];
+  filteredProducts: any[] = [];
   brands: any[] = [];
   categories: any[] = [];
   colors: any[] = [];
   totalProducts = 0;
+  pageSize = 10;
+  currentPage = 1;
+  searchTerm = '';
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredProducts.length / this.pageSize);
+  }
+
+  brandOptions: any[] = [];
+  categoryOptions: any[] = [];
+  colorOptions: any[] = [];
 
   ngOnInit() {
     this.loadMockData();
     this.setupFilters();
-    this.loadProducts();
+    this.filteredProducts = [...this.products];
+    
+    // Initialize table columns
+    this.tableColumns = [
+      { key: 'image', title: 'Image', label: 'Image', template: this.imageTemplate },
+      { key: 'name', title: 'Product', label: 'Product', template: this.nameTemplate },
+      { key: 'brand', title: 'Brand', label: 'Brand' },
+      { key: 'category', title: 'Category', label: 'Category' },
+      { key: 'color', title: 'Color', label: 'Color', template: this.colorTemplate },
+      { key: 'minimumBuyingQuantity', title: 'Min Qty', label: 'Min Qty' },
+      { key: 'isActive', title: 'Status', label: 'Status', template: this.statusTemplate },
+      { key: 'actions', title: 'Actions', label: 'Actions', template: this.actionsTemplate }
+    ];
   }
 
   private setupFilters() {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(value => {
-        this.filter.search = value || '';
-        this.filter.pageNumber = 1;
-        this.loadProducts();
-      });
-
-    this.brandControl.valueChanges.subscribe(value => {
-      this.filter.brandIds = value || [];
-      this.filter.pageNumber = 1;
-      this.loadProducts();
+    this.brandControl.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+      this.applyFilters();
     });
 
-    this.categoryControl.valueChanges.subscribe(value => {
-      this.filter.categoryIds = value || [];
-      this.filter.pageNumber = 1;
-      this.loadProducts();
+    this.categoryControl.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+      this.applyFilters();
     });
 
-    this.colorControl.valueChanges.subscribe(value => {
-      this.filter.colorIds = value || [];
-      this.filter.pageNumber = 1;
-      this.loadProducts();
+    this.colorControl.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+      this.applyFilters();
     });
   }
 
   private loadMockData() {
-    // Mock data
+    // Load brands
     this.brands = [
       { id: 1, name: 'Brand A' },
       { id: 2, name: 'Brand B' },
       { id: 3, name: 'Brand C' }
     ];
 
+    this.brandOptions = this.brands.map(brand => ({
+      value: brand.id,
+      label: brand.name
+    }));
+
+    // Load categories
     this.categories = [
       { id: 1, name: 'Electronics' },
       { id: 2, name: 'Machinery' },
       { id: 3, name: 'Tools' }
     ];
 
+    this.categoryOptions = this.categories.map(category => ({
+      value: category.id,
+      label: category.name
+    }));
+
+    // Load colors
     this.colors = [
       { id: 1, name: 'Red', hex: '#f44336' },
       { id: 2, name: 'Blue', hex: '#2196f3' },
@@ -616,6 +836,12 @@ export class ProductListComponent implements OnInit {
       { id: 4, name: 'Black', hex: '#000000' }
     ];
 
+    this.colorOptions = this.colors.map(color => ({
+      value: color.id,
+      label: color.name
+    }));
+
+    // Load products
     this.products = [
       {
         id: 1,
@@ -667,48 +893,52 @@ export class ProductListComponent implements OnInit {
     this.totalProducts = this.products.length;
   }
 
-  private loadProducts() {
-    // Filter products based on current filters
-    let filteredProducts = [...this.products];
-
-    if (this.filter.search) {
-      const search = this.filter.search.toLowerCase();
-      filteredProducts = filteredProducts.filter(p => 
-        p.name.toLowerCase().includes(search) ||
-        p.modelNumber.toLowerCase().includes(search) ||
-        p.description.toLowerCase().includes(search)
-      );
-    }
-
-    if (this.filter.brandIds.length > 0) {
-      filteredProducts = filteredProducts.filter(p => 
-        this.filter.brandIds.includes(p.brandId)
-      );
-    }
-
-    if (this.filter.categoryIds.length > 0) {
-      filteredProducts = filteredProducts.filter(p => 
-        this.filter.categoryIds.includes(p.categoryId)
-      );
-    }
-
-    if (this.filter.colorIds.length > 0) {
-      filteredProducts = filteredProducts.filter(p => 
-        this.filter.colorIds.includes(p.colorId)
-      );
-    }
-
-    this.totalProducts = filteredProducts.length;
-    
-    // Apply pagination
-    const startIndex = (this.filter.pageNumber - 1) * this.filter.take;
-    this.products = filteredProducts.slice(startIndex, startIndex + this.filter.take);
+  onSearch(searchTerm: string): void {
+    this.searchTerm = searchTerm.toLowerCase();
+    this.currentPage = 1;
+    this.applyFilters();
   }
 
-  onPageChange(event: PageEvent) {
-    this.filter.pageNumber = event.pageIndex + 1;
-    this.filter.take = event.pageSize;
-    this.loadProducts();
+  private applyFilters() {
+    let filtered = [...this.products];
+
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      filtered = filtered.filter(product => 
+        product.name.toLowerCase().includes(this.searchTerm) ||
+        product.modelNumber.toLowerCase().includes(this.searchTerm) ||
+        product.description.toLowerCase().includes(this.searchTerm)
+      );
+    }
+
+    // Apply brand filter
+    const selectedBrands = this.brandControl.value || [];
+    if (selectedBrands.length > 0) {
+      filtered = filtered.filter(product => selectedBrands.includes(product.brandId));
+    }
+
+    // Apply category filter
+    const selectedCategories = this.categoryControl.value || [];
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(product => selectedCategories.includes(product.categoryId));
+    }
+
+    // Apply color filter
+    const selectedColors = this.colorControl.value || [];
+    if (selectedColors.length > 0) {
+      filtered = filtered.filter(product => selectedColors.includes(product.colorId));
+    }
+
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.filteredProducts = filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.applyFilters();
+    }
   }
 
   clearFilters() {
@@ -716,12 +946,25 @@ export class ProductListComponent implements OnInit {
     this.brandControl.setValue([]);
     this.categoryControl.setValue([]);
     this.colorControl.setValue([]);
+    this.searchTerm = '';
+    this.currentPage = 1;
+    this.applyFilters();
   }
 
   hasActiveFilters(): boolean {
-    return this.filter.brandIds.length > 0 || 
-           this.filter.categoryIds.length > 0 || 
-           this.filter.colorIds.length > 0;
+    return !!(this.brandControl.value?.length || this.categoryControl.value?.length || this.colorControl.value?.length);
+  }
+
+  getSelectedBrands(): number[] {
+    return this.brandControl.value || [];
+  }
+
+  getSelectedCategories(): number[] {
+    return this.categoryControl.value || [];
+  }
+
+  getSelectedColors(): number[] {
+    return this.colorControl.value || [];
   }
 
   removeBrandFilter(brandId: number) {
@@ -761,8 +1004,29 @@ export class ProductListComponent implements OnInit {
       : 'assets/images/no-image.png';
   }
 
+  getActiveProducts(): number {
+    return this.products.filter(p => p.isActive).length;
+  }
+
+  getInactiveProducts(): number {
+    return this.products.filter(p => !p.isActive).length;
+  }
+
+  getTotalBrands(): number {
+    return this.brands.length;
+  }
+
   deleteProduct(productId: number) {
-    // Implement delete functionality
-    console.log('Delete product:', productId);
+    if (confirm('Are you sure you want to delete this product?')) {
+      this.products = this.products.filter(p => p.id !== productId);
+      this.applyFilters();
+      console.log('Product deleted:', productId);
+    }
+  }
+
+  refreshData() {
+    this.loadMockData();
+    this.filteredProducts = [...this.products];
+    console.log('Data refreshed');
   }
 }

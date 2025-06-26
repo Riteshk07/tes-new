@@ -2,22 +2,26 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDividerModule } from '@angular/material/divider';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { EnquiryDto, EnquiryStatus } from '../../../models/enquiry.dto';
+
+import { ViewChild, TemplateRef } from '@angular/core';
+
+// Import shared components
+import { 
+  SearchInputComponent,
+  ButtonComponent,
+  CardComponent,
+  SelectComponent,
+  ChipComponent,
+  TableComponent
+} from '../../../shared/components';
+
+interface PageEvent {
+  pageIndex: number;
+  pageSize: number;
+  length: number;
+}
 
 @Component({
   selector: 'app-enquiry-list',
@@ -26,293 +30,294 @@ import { EnquiryDto, EnquiryStatus } from '../../../models/enquiry.dto';
     CommonModule,
     RouterModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatChipsModule,
-    MatMenuModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    MatDividerModule
+    SearchInputComponent,
+    ButtonComponent,
+    CardComponent,
+    SelectComponent,
+    ChipComponent,
+    TableComponent
   ],
   template: `
     <div class="enquiry-list-container">
       <div class="header">
         <h1>Enquiry Management</h1>
         <div class="header-actions">
-          <button mat-raised-button color="primary" routerLink="/enquiries/create">
-            <mat-icon>add</mat-icon>
+          <app-button variant="primary" routerLink="/enquiries/create">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
             New Enquiry
-          </button>
-          <button mat-icon-button [matMenuTriggerFor]="viewMenu">
-            <mat-icon>more_vert</mat-icon>
-          </button>
-          <mat-menu #viewMenu="matMenu">
-            <button mat-menu-item (click)="exportEnquiries()">
-              <mat-icon>download</mat-icon>
-              Export Enquiries
-            </button>
-            <button mat-menu-item (click)="refreshData()">
-              <mat-icon>refresh</mat-icon>
-              Refresh
-            </button>
-          </mat-menu>
+          </app-button>
+          <app-button variant="outline" (click)="exportEnquiries()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+            </svg>
+            Export
+          </app-button>
+          <app-button variant="outline" (click)="refreshData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+            </svg>
+            Refresh
+          </app-button>
         </div>
       </div>
 
       <!-- Filters -->
-      <mat-card class="filters-card">
-        <mat-card-content>
-          <div class="filters-row">
-            <mat-form-field appearance="outline" class="search-field">
-              <mat-label>Search enquiries</mat-label>
-              <input matInput [formControl]="searchControl" placeholder="Enter enquiry number, customer name, or subject">
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
+      <app-card title="Filter Enquiries" class="filters-card">
+        <div class="filters-row">
+          <app-search-input
+            placeholder="Search enquiries by number, customer, or subject"
+            (search)="onSearch($event)"
+            width="400px"
+          ></app-search-input>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Status</mat-label>
-              <mat-select [formControl]="statusControl" multiple>
-                <mat-option *ngFor="let status of statusOptions" [value]="status.value">
-                  <span class="status-option">
-                    <span class="status-dot" [class]="'status-' + status.value.toString().toLowerCase()"></span>
-                    {{status.label}}
-                  </span>
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Status"
+            [options]="statusOptions"
+            [multiple]="true"
+            [formControl]="statusControl"
+            width="200px"
+          ></app-select>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Priority</mat-label>
-              <mat-select [formControl]="priorityControl" multiple>
-                <mat-option value="Low">Low</mat-option>
-                <mat-option value="Medium">Medium</mat-option>
-                <mat-option value="High">High</mat-option>
-                <mat-option value="Urgent">Urgent</mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Priority"
+            [options]="priorityOptions"
+            [multiple]="true"
+            [formControl]="priorityControl"
+            width="200px"
+          ></app-select>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Assigned Staff</mat-label>
-              <mat-select [formControl]="staffControl" multiple>
-                <mat-option *ngFor="let staff of staffList" [value]="staff.id">
-                  {{staff.name}}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
+          <app-select
+            placeholder="Assigned Staff"
+            [options]="staffOptions"
+            [multiple]="true"
+            [formControl]="staffControl"
+            width="200px"
+          ></app-select>
 
-            <button mat-button (click)="clearFilters()" class="clear-filters">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
+          <app-button variant="outline" (click)="clearFilters()" class="clear-filters">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41l-1.41-1.41-5.59 5.59-5.59-5.59-1.41 1.41 5.59 5.59-5.59 5.59 1.41 1.41 5.59-5.59 5.59 5.59 1.41-1.41-5.59-5.59z"/>
+            </svg>
+            Clear
+          </app-button>
+        </div>
+
+        <div class="active-filters" *ngIf="hasActiveFilters()">
+          <span class="filter-label">Active filters:</span>
+          <div class="chip-list">
+            <app-chip 
+              *ngFor="let status of getSelectedStatuses()" 
+              (remove)="removeStatusFilter(status)"
+              [removable]="true"
+            >
+              {{getStatusLabel(status)}}
+            </app-chip>
+            <app-chip 
+              *ngFor="let priority of getSelectedPriorities()" 
+              (remove)="removePriorityFilter(priority)"
+              [removable]="true"
+            >
+              {{priority}}
+            </app-chip>
           </div>
-
-          <div class="active-filters" *ngIf="hasActiveFilters()">
-            <span class="filter-label">Active filters:</span>
-            <mat-chip-set>
-              <mat-chip *ngFor="let status of getSelectedStatuses()" (removed)="removeStatusFilter(status)">
-                {{getStatusLabel(status)}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-              <mat-chip *ngFor="let priority of getSelectedPriorities()" (removed)="removePriorityFilter(priority)">
-                {{priority}}
-                <mat-icon matChipRemove>cancel</mat-icon>
-              </mat-chip>
-            </mat-chip-set>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </app-card>
 
       <!-- Statistics Cards -->
       <div class="stats-section">
         <div class="stats-grid">
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon">help_outline</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{totalEnquiries}}</div>
-                  <div class="stat-label">Total Enquiries</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,6A4,4 0 0,0 8,10H10A2,2 0 0,1 12,8A2,2 0 0,1 14,10C14,12 11,11.75 11,15H13C13,12.75 16,12.5 16,10A4,4 0 0,0 12,6Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{totalEnquiries}}</div>
+                <div class="stat-label">Total Enquiries</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon pending">schedule</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getEnquiriesByStatus('Pending')}}</div>
-                  <div class="stat-label">Pending</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon pending" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getEnquiriesByStatus('Pending')}}</div>
+                <div class="stat-label">Pending</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon inprogress">build</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getEnquiriesByStatus('InProgress')}}</div>
-                  <div class="stat-label">In Progress</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon inprogress" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getEnquiriesByStatus('InProgress')}}</div>
+                <div class="stat-label">In Progress</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
 
-          <mat-card class="stat-card">
-            <mat-card-content>
-              <div class="stat-content">
-                <mat-icon class="stat-icon quoted">description</mat-icon>
-                <div class="stat-info">
-                  <div class="stat-number">{{getEnquiriesByStatus('Quoted')}}</div>
-                  <div class="stat-label">Quoted</div>
-                </div>
+          <app-card class="stat-card">
+            <div class="stat-content">
+              <svg class="stat-icon quoted" width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+              </svg>
+              <div class="stat-info">
+                <div class="stat-number">{{getEnquiriesByStatus('Quoted')}}</div>
+                <div class="stat-label">Quoted</div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </app-card>
         </div>
       </div>
 
       <!-- Enquiries Table -->
-      <mat-card>
-        <div class="table-container">
-          <table mat-table [dataSource]="enquiries" class="enquiries-table">
-            <ng-container matColumnDef="enquiryNumber">
-              <th mat-header-cell *matHeaderCellDef>Enquiry #</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <div class="enquiry-number">
-                  <a [routerLink]="['/enquiries/view', enquiry.id]" class="enquiry-link">
-                    {{enquiry.enquiryNumber}}
-                  </a>
-                  <div class="enquiry-date">{{enquiry.createdAt | date:'short'}}</div>
-                </div>
-              </td>
-            </ng-container>
+      <app-card>
+        <app-table
+          [data]="filteredEnquiries"
+          [columns]="tableColumns"
+          [searchable]="false"
+          [sortable]="true"
+        >
+          <ng-template #enquiryNumberTemplate let-enquiry>
+            <div class="enquiry-number">
+              <a [routerLink]="['/enquiries/view', enquiry.id]" class="enquiry-link">
+                {{enquiry.enquiryNumber}}
+              </a>
+              <div class="enquiry-date">{{enquiry.createdAt | date:'short'}}</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="customer">
-              <th mat-header-cell *matHeaderCellDef>Customer</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <div class="customer-info">
-                  <div class="customer-name">{{enquiry.customerName}}</div>
-                  <div class="customer-org" *ngIf="enquiry.organizationName">{{enquiry.organizationName}}</div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #customerTemplate let-enquiry>
+            <div class="customer-info">
+              <div class="customer-name">{{enquiry.customerName}}</div>
+              <div class="customer-org" *ngIf="enquiry.organizationName">{{enquiry.organizationName}}</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="subject">
-              <th mat-header-cell *matHeaderCellDef>Subject</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <div class="subject-info">
-                  <div class="subject-title">{{enquiry.subject}}</div>
-                  <div class="item-count">{{enquiry.items?.length || 0}} items</div>
-                </div>
-              </td>
-            </ng-container>
+          <ng-template #subjectTemplate let-enquiry>
+            <div class="subject-info">
+              <div class="subject-title">{{enquiry.subject}}</div>
+              <div class="item-count">{{(enquiry.enquiredProducts?.length || 0)}} items</div>
+            </div>
+          </ng-template>
 
-            <ng-container matColumnDef="status">
-              <th mat-header-cell *matHeaderCellDef>Status</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <span class="status-badge" [class]="'status-' + getStatusClass(enquiry.status)">
-                  {{getStatusLabel(enquiry.status)}}
-                </span>
-              </td>
-            </ng-container>
+          <ng-template #statusTemplate let-enquiry>
+            <span class="status-badge" [class]="'status-' + getStatusClass(enquiry.status)">
+              {{getStatusLabel(enquiry.status)}}
+            </span>
+          </ng-template>
 
-            <ng-container matColumnDef="priority">
-              <th mat-header-cell *matHeaderCellDef>Priority</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <span class="priority-badge" [class]="'priority-' + enquiry.priority.toLowerCase()">
-                  <mat-icon>{{getPriorityIcon(enquiry.priority)}}</mat-icon>
-                  {{enquiry.priority}}
-                </span>
-              </td>
-            </ng-container>
+          <ng-template #priorityTemplate let-enquiry>
+            <span class="priority-badge" [class]="'priority-' + enquiry.priority.toLowerCase()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path [attr.d]="getPriorityIconPath(enquiry.priority)"/>
+              </svg>
+              {{enquiry.priority}}
+            </span>
+          </ng-template>
 
-            <ng-container matColumnDef="assignedStaff">
-              <th mat-header-cell *matHeaderCellDef>Assigned To</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <div class="assigned-staff" *ngIf="enquiry.assignedStaffName; else unassigned">
-                  <mat-icon class="staff-icon">person</mat-icon>
-                  {{enquiry.assignedStaffName}}
-                </div>
-                <ng-template #unassigned>
-                  <span class="unassigned-text">Unassigned</span>
-                </ng-template>
-              </td>
-            </ng-container>
+          <ng-template #assignedStaffTemplate let-enquiry>
+            <div class="assigned-staff" *ngIf="enquiry.assignedStaffName; else unassigned">
+              <svg class="staff-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+              </svg>
+              {{enquiry.assignedStaffName}}
+            </div>
+            <ng-template #unassigned>
+              <span class="unassigned-text">Unassigned</span>
+            </ng-template>
+          </ng-template>
 
-            <ng-container matColumnDef="estimatedValue">
-              <th mat-header-cell *matHeaderCellDef>Est. Value</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <div class="estimated-value" *ngIf="enquiry.totalEstimatedValue; else noEstimate">
-                  ₹{{enquiry.totalEstimatedValue | number:'1.0-0'}}
-                </div>
-                <ng-template #noEstimate>
-                  <span class="no-estimate">TBD</span>
-                </ng-template>
-              </td>
-            </ng-container>
+          <ng-template #estimatedValueTemplate let-enquiry>
+            <div class="estimated-value" *ngIf="enquiry.totalEstimatedValue; else noEstimate">
+              ₹{{enquiry.totalEstimatedValue | number:'1.0-0'}}
+            </div>
+            <ng-template #noEstimate>
+              <span class="no-estimate">TBD</span>
+            </ng-template>
+          </ng-template>
 
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>Actions</th>
-              <td mat-cell *matCellDef="let enquiry">
-                <button mat-icon-button [routerLink]="['/enquiries/view', enquiry.id]" 
-                        matTooltip="View Details" color="primary">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button [routerLink]="['/enquiries/edit', enquiry.id]" 
-                        matTooltip="Edit Enquiry" color="accent">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button [matMenuTriggerFor]="actionMenu" 
-                        matTooltip="More Actions">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #actionMenu="matMenu">
-                  <button mat-menu-item (click)="createQuotation(enquiry.id)" 
-                          [disabled]="enquiry.status === EnquiryStatus.Quoted">
-                    <mat-icon>description</mat-icon>
-                    Create Quotation
-                  </button>
-                  <button mat-menu-item (click)="assignEnquiry(enquiry.id)">
-                    <mat-icon>assignment_ind</mat-icon>
-                    Assign to Staff
-                  </button>
-                  <button mat-menu-item (click)="exportEnquiry(enquiry.id)">
-                    <mat-icon>download</mat-icon>
-                    Export
-                  </button>
-                  <mat-divider></mat-divider>
-                  <button mat-menu-item (click)="deleteEnquiry(enquiry.id)" color="warn">
-                    <mat-icon>delete</mat-icon>
-                    Delete
-                  </button>
-                </mat-menu>
-              </td>
-            </ng-container>
+          <ng-template #actionsTemplate let-enquiry>
+            <div class="action-buttons">
+              <app-button 
+                variant="outline" 
+                size="small"
+                [routerLink]="['/enquiries/view', enquiry.id]"
+                title="View Details"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small"
+                [routerLink]="['/enquiries/edit', enquiry.id]"
+                title="Edit Enquiry"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small"
+                (click)="createQuotation(enquiry.id)"
+                [disabled]="enquiry.status === EnquiryStatus.Quoted"
+                title="Create Quotation"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                </svg>
+              </app-button>
+              <app-button 
+                variant="outline" 
+                size="small"
+                (click)="deleteEnquiry(enquiry.id)"
+                title="Delete Enquiry"
+                class="delete-button"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+              </app-button>
+            </div>
+          </ng-template>
+        </app-table>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          </table>
+        <!-- Pagination -->
+        <div *ngIf="totalPages > 1" class="pagination">
+          <app-button 
+            variant="outline" 
+            size="small"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)"
+          >
+            Previous
+          </app-button>
+          
+          <span class="page-info">
+            Page {{currentPage}} of {{totalPages}} ({{totalEnquiries}} enquiries)
+          </span>
+          
+          <app-button 
+            variant="outline" 
+            size="small"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)"
+          >
+            Next
+          </app-button>
         </div>
-
-        <mat-paginator 
-          [length]="totalEnquiries"
-          [pageSize]="pageSize"
-          [pageSizeOptions]="[10, 25, 50, 100]"
-          (page)="onPageChange($event)"
-          showFirstLastButtons>
-        </mat-paginator>
-      </mat-card>
+      </app-card>
     </div>
   `,
   styles: [`
@@ -366,8 +371,15 @@ import { EnquiryDto, EnquiryStatus } from '../../../models/enquiry.dto';
     }
 
     .filter-label {
-      font-weight: 500;
-      color: #666;
+      font-weight: 600;
+      color: #2653a6;
+      margin-right: 8px;
+    }
+    
+    .chip-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .status-option {
@@ -598,10 +610,29 @@ import { EnquiryDto, EnquiryStatus } from '../../../models/enquiry.dto';
       color: #999;
       font-style: italic;
     }
-
-    .mat-mdc-row:hover {
-      background-color: #f5f5f5;
+    
+    .action-buttons {
+      display: flex;
+      gap: 8px;
     }
+    
+    .delete-button {
+      color: #ea3b26 !important;
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      margin-top: 24px;
+    }
+
+    .page-info {
+      font-size: 14px;
+      color: #6b7280;
+    }
+
 
     @media (max-width: 768px) {
       .header {
@@ -642,17 +673,32 @@ import { EnquiryDto, EnquiryStatus } from '../../../models/enquiry.dto';
   `]
 })
 export class EnquiryListComponent implements OnInit {
-  displayedColumns: string[] = ['enquiryNumber', 'customer', 'subject', 'status', 'priority', 'assignedStaff', 'estimatedValue', 'actions'];
-  
+  @ViewChild('enquiryNumberTemplate', { static: true }) enquiryNumberTemplate!: TemplateRef<any>;
+  @ViewChild('customerTemplate', { static: true }) customerTemplate!: TemplateRef<any>;
+  @ViewChild('subjectTemplate', { static: true }) subjectTemplate!: TemplateRef<any>;
+  @ViewChild('statusTemplate', { static: true }) statusTemplate!: TemplateRef<any>;
+  @ViewChild('priorityTemplate', { static: true }) priorityTemplate!: TemplateRef<any>;
+  @ViewChild('assignedStaffTemplate', { static: true }) assignedStaffTemplate!: TemplateRef<any>;
+  @ViewChild('estimatedValueTemplate', { static: true }) estimatedValueTemplate!: TemplateRef<any>;
+  @ViewChild('actionsTemplate', { static: true }) actionsTemplate!: TemplateRef<any>;
+
   searchControl = new FormControl('');
   statusControl = new FormControl<EnquiryStatus[]>([]);
   priorityControl = new FormControl<string[]>([]);
   staffControl = new FormControl<number[]>([]);
 
   enquiries: EnquiryDto[] = [];
+  filteredEnquiries: EnquiryDto[] = [];
   totalEnquiries = 0;
   pageSize = 10;
-  currentPage = 0;
+  currentPage = 1;
+  searchTerm = '';
+  
+  get totalPages(): number {
+    return Math.ceil(this.filteredEnquiries.length / this.pageSize);
+  }
+  
+  tableColumns: any[] = []; // Will be initialized in ngOnInit
 
   statusOptions = [
     { value: EnquiryStatus.Pending, label: 'Pending' },
@@ -661,33 +707,58 @@ export class EnquiryListComponent implements OnInit {
     { value: EnquiryStatus.Completed, label: 'Completed' },
     { value: EnquiryStatus.Cancelled, label: 'Cancelled' }
   ];
+  
+  priorityOptions = [
+    { value: 'Low', label: 'Low' },
+    { value: 'Medium', label: 'Medium' },
+    { value: 'High', label: 'High' },
+    { value: 'Urgent', label: 'Urgent' }
+  ];
 
   staffList = [
     { id: 1, name: 'John Doe' },
     { id: 2, name: 'Jane Smith' },
     { id: 3, name: 'Bob Johnson' }
   ];
+  
+  staffOptions = this.staffList.map(staff => ({
+    value: staff.id,
+    label: staff.name
+  }));
 
   EnquiryStatus = EnquiryStatus;
-
-  constructor(
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar
-  ) {}
 
   ngOnInit() {
     this.loadMockData();
     this.setupFilters();
+    this.filteredEnquiries = [...this.enquiries];
+    // Assign TemplateRefs to tableColumns after ViewChilds are available
+    this.tableColumns = [
+      { key: 'enquiryNumber', title: 'Enquiry #', label: 'Enquiry #', template: this.enquiryNumberTemplate },
+      { key: 'customer', title: 'Customer', label: 'Customer', template: this.customerTemplate },
+      { key: 'subject', title: 'Subject', label: 'Subject', template: this.subjectTemplate },
+      { key: 'status', title: 'Status', label: 'Status', template: this.statusTemplate },
+      { key: 'priority', title: 'Priority', label: 'Priority', template: this.priorityTemplate },
+      { key: 'assignedStaff', title: 'Assigned To', label: 'Assigned To', template: this.assignedStaffTemplate },
+      { key: 'estimatedValue', title: 'Est. Value', label: 'Est. Value', template: this.estimatedValueTemplate },
+      { key: 'actions', title: 'Actions', label: 'Actions', template: this.actionsTemplate }
+    ];
+    this.filteredEnquiries = [...this.enquiries];
   }
-
+    
   private setupFilters() {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => this.applyFilters());
-
-    this.statusControl.valueChanges.subscribe(() => this.applyFilters());
-    this.priorityControl.valueChanges.subscribe(() => this.applyFilters());
-    this.staffControl.valueChanges.subscribe(() => this.applyFilters());
+    this.statusControl.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+      this.applyFilters();
+    });
+    this.priorityControl.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+      this.applyFilters();
+    });
+    this.staffControl.valueChanges.subscribe(() => {
+      this.currentPage = 1;
+      this.applyFilters();
+    });
   }
 
   private loadMockData() {
@@ -777,15 +848,56 @@ export class EnquiryListComponent implements OnInit {
     this.totalEnquiries = this.enquiries.length;
   }
 
+  onSearch(searchTerm: string): void {
+    this.searchTerm = searchTerm.toLowerCase();
+    this.currentPage = 1;
+    this.applyFilters();
+  }
+  
   private applyFilters() {
-    // Implementation would filter the enquiries based on form controls
-    // For now, showing all mock data
+    let filtered = [...this.enquiries];
+    
+    // Apply search filter
+    if (this.searchTerm.trim()) {
+      filtered = filtered.filter(enquiry => 
+        enquiry.enquiryNumber.toLowerCase().includes(this.searchTerm) ||
+        (enquiry.customerName?.toLowerCase() ?? '').includes(this.searchTerm) ||
+        (enquiry.subject?.toLowerCase() ?? '').includes(this.searchTerm)
+      );
+    }
+    
+    // Apply status filter
+    const selectedStatuses = this.statusControl.value || [];
+    if (selectedStatuses.length > 0) {
+      filtered = filtered.filter(enquiry => enquiry.status !== undefined && selectedStatuses.includes(enquiry.status));
+    }
+    
+    // Apply priority filter
+    const selectedPriorities = this.priorityControl.value || [];
+    if (selectedPriorities.length > 0) {
+      filtered = filtered.filter(enquiry => enquiry.priority !== undefined && selectedPriorities.includes(enquiry.priority));
+    }
+    
+    // Apply staff filter
+    const selectedStaff = this.staffControl.value || [];
+    if (selectedStaff.length > 0) {
+      filtered = filtered.filter(enquiry => 
+        enquiry.assignedStaffId && selectedStaff.includes(enquiry.assignedStaffId)
+      );
+    }
+    
+    this.totalEnquiries = filtered.length;
+    
+    // Apply pagination
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    this.filteredEnquiries = filtered.slice(startIndex, startIndex + this.pageSize);
   }
 
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.applyFilters();
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.applyFilters();
+    }
   }
 
   clearFilters() {
@@ -826,14 +938,14 @@ export class EnquiryListComponent implements OnInit {
     return EnquiryStatus[status].toLowerCase();
   }
 
-  getPriorityIcon(priority: string): string {
-    const icons: { [key: string]: string } = {
-      'Low': 'keyboard_arrow_down',
-      'Medium': 'remove',
-      'High': 'keyboard_arrow_up',
-      'Urgent': 'priority_high'
+  getPriorityIconPath(priority: string): string {
+    const iconPaths: { [key: string]: string } = {
+      'Low': 'M7 14l5-5 5 5z',
+      'Medium': 'M19 13H5v-2h14v2z',
+      'High': 'M7 10l5 5 5-5z',
+      'Urgent': 'M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z'
     };
-    return icons[priority] || 'help';
+    return iconPaths[priority] || 'M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z';
   }
 
   getEnquiriesByStatus(status: string): number {
@@ -842,30 +954,34 @@ export class EnquiryListComponent implements OnInit {
 
   createQuotation(enquiryId: number) {
     // Navigate to create quotation from enquiry
-    this.snackBar.open('Creating quotation...', 'Close', { duration: 2000 });
+    alert('Creating quotation...');
   }
 
   assignEnquiry(enquiryId: number) {
     // Open assign dialog
-    this.snackBar.open('Assignment feature coming soon', 'Close', { duration: 2000 });
+    alert('Assignment feature coming soon');
   }
 
   exportEnquiry(enquiryId: number) {
-    this.snackBar.open('Exporting enquiry...', 'Close', { duration: 2000 });
+    alert('Exporting enquiry...');
   }
 
   deleteEnquiry(enquiryId: number) {
     if (confirm('Are you sure you want to delete this enquiry?')) {
-      this.snackBar.open('Enquiry deleted successfully', 'Close', { duration: 3000 });
+      // Remove from local array for demo
+      this.enquiries = this.enquiries.filter(e => e.id !== enquiryId);
+      this.applyFilters();
+      alert('Enquiry deleted successfully');
     }
   }
 
   exportEnquiries() {
-    this.snackBar.open('Exporting all enquiries...', 'Close', { duration: 2000 });
+    alert('Exporting all enquiries...');
   }
 
   refreshData() {
     this.loadMockData();
-    this.snackBar.open('Data refreshed', 'Close', { duration: 2000 });
+    this.filteredEnquiries = [...this.enquiries];
+    alert('Data refreshed');
   }
 }

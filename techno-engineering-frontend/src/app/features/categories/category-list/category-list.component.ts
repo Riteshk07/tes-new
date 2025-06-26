@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 // Import shared components
 import { 
@@ -15,6 +17,7 @@ import {
   imports: [
     CommonModule,
     RouterModule,
+    ReactiveFormsModule,
     SearchInputComponent,
     ButtonComponent,
     CardComponent
@@ -578,41 +581,35 @@ import {
   `]
 })
 export class CategoryListComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'name', 'description', 'status', 'createdAt', 'actions'];
-  searchControl = new FormControl('');
-  
   allCategories: any[] = [];
   filteredCategories: any[] = [];
-  totalCategories = 0;
-  pageSize = 10;
-  currentPage = 0;
+  searchTerm: string = '';
+  
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 10;
+  
+  get totalPages(): number {
+    return Math.ceil(this.filteredCategories.length / this.pageSize);
+  }
+  
+  get paginatedCategories(): any[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.filteredCategories.slice(startIndex, startIndex + this.pageSize);
+  }
+  
+  trackByCategory(index: number, category: any): number {
+    return category.id;
+  }
 
-  private categoryIcons: { [key: string]: string } = {
-    'Electronics': 'electrical_services',
-    'Machinery': 'precision_manufacturing',
-    'Tools': 'build',
-    'Components': 'memory',
-    'Materials': 'science',
-    'Safety': 'security',
-    'Industrial': 'factory'
-  };
 
-  constructor(private snackBar: MatSnackBar) {}
+  constructor() {}
 
   ngOnInit() {
     this.loadMockData();
-    this.setupSearch();
-    this.applyFilters();
+    this.filteredCategories = [...this.allCategories];
   }
 
-  private setupSearch() {
-    this.searchControl.valueChanges
-      .pipe(debounceTime(300), distinctUntilChanged())
-      .subscribe(() => {
-        this.currentPage = 0;
-        this.applyFilters();
-      });
-  }
 
   private loadMockData() {
     this.allCategories = [
@@ -666,35 +663,40 @@ export class CategoryListComponent implements OnInit {
       }
     ];
 
-    this.totalCategories = this.allCategories.length;
   }
 
-  private applyFilters() {
-    let filtered = [...this.allCategories];
-
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
-    if (searchTerm) {
-      filtered = filtered.filter(category => 
-        category.name.toLowerCase().includes(searchTerm) ||
-        category.description?.toLowerCase().includes(searchTerm)
-      );
+  onSearch(searchTerm: string): void {
+    this.searchTerm = searchTerm.toLowerCase();
+    this.currentPage = 1; // Reset to first page when searching
+    
+    if (!this.searchTerm.trim()) {
+      this.filteredCategories = [...this.allCategories];
+      return;
     }
 
-    this.totalCategories = filtered.length;
-    
-    // Apply pagination
-    const startIndex = this.currentPage * this.pageSize;
-    this.filteredCategories = filtered.slice(startIndex, startIndex + this.pageSize);
+    this.filteredCategories = this.allCategories.filter(category => 
+      category.name.toLowerCase().includes(this.searchTerm) ||
+      (category.description && category.description.toLowerCase().includes(this.searchTerm))
+    );
   }
 
-  onPageChange(event: PageEvent) {
-    this.currentPage = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.applyFilters();
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
   }
 
-  getCategoryIcon(categoryName: string): string {
-    return this.categoryIcons[categoryName] || 'category';
+  getCategoryIconPath(categoryName: string): string {
+    const iconPaths: { [key: string]: string } = {
+      'Electronics': 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+      'Machinery': 'M9.5 3A6.5 6.5 0 003 9.5c0 1.61.59 3.09 1.56 4.23l.71.71-1.27 1.27-.71-.71A8.5 8.5 0 109.5 1.5V3z',
+      'Tools': 'M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z',
+      'Components': 'M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z',
+      'Materials': 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+      'Safety': 'M18 8h-1c0-2.76-2.24-5-5-5S7 5.24 7 8H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9c.4-1.25 1.6-2.1 3.1-2.1s2.7.85 3.1 2.1z',
+      'Industrial': 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'
+    };
+    return iconPaths[categoryName] || 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z';
   }
 
   getProductCount(categoryId: number): number {
@@ -724,27 +726,25 @@ export class CategoryListComponent implements OnInit {
     return Math.max(...this.allCategories.map(c => c.productCount || 0));
   }
 
-  get categories() {
-    return this.filteredCategories;
-  }
-
-  set categories(value: any[]) {
-    this.filteredCategories = value;
-  }
 
   deleteCategory(categoryId: number) {
     const category = this.allCategories.find(c => c.id === categoryId);
     if (category && this.getProductCount(categoryId) > 0) {
-      this.snackBar.open('Cannot delete category with associated products', 'Close', { duration: 5000 });
+      alert('Cannot delete category with associated products');
       return;
     }
 
     if (confirm('Are you sure you want to delete this category?')) {
-      // Simulate API call
-      this.snackBar.open('Category deleted successfully', 'Close', { duration: 3000 });
       // Remove from local array for demo
       this.allCategories = this.allCategories.filter(c => c.id !== categoryId);
-      this.applyFilters();
+      this.filteredCategories = this.filteredCategories.filter(c => c.id !== categoryId);
+      
+      // Adjust current page if necessary
+      if (this.paginatedCategories.length === 0 && this.currentPage > 1) {
+        this.currentPage--;
+      }
+      
+      alert('Category deleted successfully');
     }
   }
 }

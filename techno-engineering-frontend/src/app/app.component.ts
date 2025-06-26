@@ -4,7 +4,6 @@ import { RouterOutlet, Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { AuthService } from './services/auth.service';
@@ -12,6 +11,7 @@ import { ThemeService } from './services/theme.service';
 import { ResponsiveService } from './services/responsive.service';
 import { UserDto } from './models/user.dto';
 import { Observable } from 'rxjs';
+import { DropdownComponent, DropdownItem } from './shared/components';
 
 @Component({
   selector: 'app-root',
@@ -22,9 +22,9 @@ import { Observable } from 'rxjs';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule,
     MatSidenavModule,
-    MatListModule
+    MatListModule,
+    DropdownComponent
   ],
   template: `
     <div class="app-container">
@@ -32,22 +32,21 @@ import { Observable } from 'rxjs';
         <button mat-icon-button (click)="toggleSidenav()" *ngIf="currentUser$ | async">
           <mat-icon>menu</mat-icon>
         </button>
-        <span class="app-title">Techno Engineering Solution</span>
+        <div class="app-title-container" (click)="navigateTo('/dashboard')">
+          <img src="/tes.png" alt="Techno Engineering Solution" class="company-logo">
+          <span class="app-title">Techno Engineering Solution</span>
+        </div>
         <span class="spacer"></span>
         <div *ngIf="currentUser$ | async as user" class="user-menu">
           <button mat-icon-button (click)="toggleTheme()" matTooltip="Toggle theme">
             <mat-icon>{{isDarkTheme ? 'light_mode' : 'dark_mode'}}</mat-icon>
           </button>
-          <button mat-button [matMenuTriggerFor]="userMenu">
-            <mat-icon>person</mat-icon>
-            {{user.firstName}} {{user.lastName}}
-          </button>
-          <mat-menu #userMenu="matMenu">
-            <button mat-menu-item (click)="logout()">
-              <mat-icon>logout</mat-icon>
-              Logout
-            </button>
-          </mat-menu>
+          <app-dropdown [items]="userMenuItems" (itemSelected)="onUserMenuItemSelected($event)">
+            <div slot="trigger" class="user-info">
+              <mat-icon>person</mat-icon>
+              <span class="user-name">{{user.firstName}} {{user.lastName}}</span>
+            </div>
+          </app-dropdown>
         </div>
       </mat-toolbar>
 
@@ -118,6 +117,32 @@ import { Observable } from 'rxjs';
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
     }
 
+    .app-title-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-1px);
+      }
+    }
+
+    .company-logo {
+      height: 32px;
+      width: auto;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+
     .app-title {
       font-size: 1.3rem;
       font-weight: 600;
@@ -132,6 +157,19 @@ import { Observable } from 'rxjs';
     .user-menu {
       display: flex;
       align-items: center;
+      gap: 8px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      font-weight: 500;
+    }
+
+    .user-name {
+      font-size: 14px;
     }
 
     .sidenav-container {
@@ -162,6 +200,10 @@ import { Observable } from 'rxjs';
         padding: 16px;
       }
       
+      .company-logo {
+        height: 28px;
+      }
+      
       .app-title {
         font-size: 1.1rem;
       }
@@ -174,6 +216,10 @@ import { Observable } from 'rxjs';
       
       .main-content {
         padding: 12px;
+      }
+      
+      .company-logo {
+        height: 24px;
       }
       
       .app-title {
@@ -304,6 +350,14 @@ export class AppComponent implements OnInit {
   sidenavOpened = true;
   sidenavMode: 'side' | 'over' = 'side';
   isDarkTheme = false;
+  
+  userMenuItems: DropdownItem[] = [
+    {
+      id: 'logout',
+      label: 'Logout',
+      icon: 'logout'
+    }
+  ];
 
   constructor(
     private authService: AuthService,
@@ -341,6 +395,14 @@ export class AppComponent implements OnInit {
 
   toggleTheme() {
     this.themeService.toggleTheme();
+  }
+
+  onUserMenuItemSelected(item: DropdownItem) {
+    switch (item.id) {
+      case 'logout':
+        this.logout();
+        break;
+    }
   }
 
   logout() {

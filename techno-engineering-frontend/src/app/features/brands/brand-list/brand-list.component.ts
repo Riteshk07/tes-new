@@ -461,6 +461,7 @@ export class BrandListComponent implements OnInit {
   allBrands: any[] = [];
   filteredBrands: any[] = [];
   searchTerm: string = '';
+  totalBrands: number = 0;
   
   // Pagination
   currentPage: number = 1;
